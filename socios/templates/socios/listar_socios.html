@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Socios{% endblock %}
+
+{% block content %}
+    <h2>Lista de Socios</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for socio in socios %}
+                <tr>
+                    <td>{{ socio.id }}</td>
+                    <td>{{ socio.nombre }}</td>
+                    <td>{{ socio.apellido }}</td>
+                    <td>{{ socio.email }}</td>
+                    <td>
+                        <a href="{% url 'socios:editar_socio' socio.id %}" class="btn btn-warning">Editar</a>
+                        <a href="{% url 'socios:eliminar_socio' socio.id %}" class="btn btn-danger">Eliminar</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
