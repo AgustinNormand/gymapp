@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Entradas Registradas</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Socio</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entrada in entradas %}
+                <tr>
+                    <td>{{ entrada.socio.nombre }} {{ entrada.socio.apellido }}</td>
+                    <td>{{ entrada.fecha_hora|date:"d/m/Y" }}</td>
+                    <td>{{ entrada.fecha_hora|time:"H:i" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">No hay entradas registradas aún.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
