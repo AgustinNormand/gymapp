@@ -3,6 +3,35 @@
 {% block content %}
 <div class="container mt-5">
     <h2>Entradas Registradas</h2>
+
+    <!-- Formulario de filtros -->
+    <form method="get" class="row mb-4">
+        <div class="col-md-3">
+            <label>Desde:</label>
+            <input type="date" name="fecha_desde" value="{{ fecha_desde }}" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label>Hasta:</label>
+            <input type="date" name="fecha_hasta" value="{{ fecha_hasta }}" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label>Socio:</label>
+            <input type="text" name="socio" value="{{ socio }}" class="form-control" placeholder="Buscar socio...">
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+            <a href="{% url 'listar_entradas' %}" class="btn btn-secondary">Limpiar</a>
+        </div>
+    </form>
+
+    <!-- Botón para exportar CSV -->
+    <div class="mb-3">
+        <a href="{% url 'exportar_entradas' %}?fecha_desde={{ fecha_desde }}&fecha_hasta={{ fecha_hasta }}&socio={{ socio }}" class="btn btn-success">
+            Exportar CSV
+        </a>
+    </div>
+
+    <!-- Tabla de resultados -->
     <table class="table table-striped">
         <thead>
             <tr>
@@ -20,7 +49,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="3">No hay entradas registradas aún.</td>
+                    <td colspan="3">No hay entradas para mostrar.</td>
                 </tr>
             {% endfor %}
         </tbody>
