@@ -1,9 +1,12 @@
 # Gym Management APP
 
 ## Django 
-### Run Migrations
+### Run Migrations for an app
 docker-compose run web python manage.py makemigrations socios
 docker-compose run web python manage.py migrate
+
+### Run Migrations for all
+docker-compose exec web python manage.py makemigrations
 
 ### Create Superuser
 docker-compose run web python manage.py createsuperuser

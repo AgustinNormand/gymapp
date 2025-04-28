@@ -9,6 +9,8 @@ from datetime import date, timedelta
 from modalidades.models import Modalidad, HistorialModalidad
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
+from .forms import SocioEditForm  # Importar el form correcto
+
 
 def alta_socio(request):
     if request.method == 'POST':
@@ -82,7 +84,7 @@ def eliminar_socio(request, id):
 def editar_socio(request, id):
     socio = get_object_or_404(Socio, id=id)
     if request.method == 'POST':
-        form = SocioForm(request.POST, instance=socio)
+        form = SocioEditForm(request.POST, instance=socio)  # 🛠️ Usamos SocioEditForm
         if form.is_valid():
             form.save()
             messages.success(request, 'Socio actualizado exitosamente.')
@@ -90,7 +92,8 @@ def editar_socio(request, id):
         else:
             messages.error(request, 'Hubo un error al actualizar el socio. Por favor revisá el formulario.')
     else:
-        form = SocioForm(instance=socio)
+        form = SocioEditForm(instance=socio)  # 🛠️ Usamos SocioEditForm
+
     return render(request, 'socios/editar_socio.html', {'form': form})
 
 

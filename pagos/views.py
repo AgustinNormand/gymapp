@@ -4,7 +4,7 @@ from socios.models import Socio
 from .forms import PagoForm
 from calendar import monthrange
 from datetime import date
-from .models import Pago, ConfiguracionPago
+from .models import Pago
 from socios.models import Socio
 from datetime import date
 from calendar import monthrange

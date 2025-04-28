@@ -9,10 +9,3 @@ class Pago(models.Model):
 
     def __str__(self):
         return f"Pago de {self.socio.nombre} {self.socio.apellido} - ${self.monto} - {self.fecha_pago.strftime('%d/%m/%Y')}"
-
-
-class ConfiguracionPago(models.Model):
-    monto_sugerido = models.DecimalField(max_digits=10, decimal_places=2, default=20000)
-
-    def __str__(self):
-        return f"Configuración de Pagos - Monto sugerido: ${self.monto_sugerido}"

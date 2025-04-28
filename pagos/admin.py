@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Pago
-from .models import Pago, ConfiguracionPago
+from .models import Pago
 
 @admin.register(Pago)
 class PagoAdmin(admin.ModelAdmin):
@@ -8,6 +8,3 @@ class PagoAdmin(admin.ModelAdmin):
     search_fields = ('socio__nombre', 'socio__apellido')
     list_filter = ('fecha_pago', 'fecha_vencimiento')
 
-@admin.register(ConfiguracionPago)
-class ConfiguracionPagoAdmin(admin.ModelAdmin):
-    list_display = ('monto_sugerido',)
