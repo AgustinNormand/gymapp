@@ -8,13 +8,9 @@ docker-compose run web python manage.py migrate
 ### Create Superuser
 docker-compose run web python manage.py createsuperuser
 
-### Start/Restart environment in Dev
-(This uses docker-compose.override.yml)
-docker-compose up
-
-### Start/Restart environment in Prod
-(This ignore docker-compose.override.yml)
-docker-compose -f docker-compose.yml up --build
+### Start/Restart environment
+docker-compose down -v --remove-orphans
+docker-compose up --build
 
 ### Build a new app
 docker-compose run web python manage.py startapp pagos
@@ -47,3 +43,24 @@ Password: asdasd123
 [] Agregar gráficos de asistencias
 [] Agregar cantidad de ingresos estimados
 [] Mandarle un whatsapp a un socio, cuando dejó de venir
+
+
+
+
+# Documentación
+
+[docker-compose up]
+        ↓
+[DB (Postgres)]        [WEB (Django + Gunicorn)]
+                           ↓
+                   [entrypoint.sh]
+                           ↓
+                [wait_for_db.sh espera DB]
+                           ↓
+                   [migrate + superuser]
+                           ↓
+                 [collectstatic + Gunicorn]
+                           ↓
+                   [Webserver corriendo]
+                           ↓
+                  [Healthchecks cada 30s]

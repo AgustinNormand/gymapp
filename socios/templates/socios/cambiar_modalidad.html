@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Cambiar Modalidad de {{ socio.nombre }} {{ socio.apellido }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="modalidad" class="form-label">Nueva Modalidad:</label>
+            <select name="modalidad" id="modalidad" class="form-control">
+                {% for modalidad in modalidades %}
+                    <option value="{{ modalidad.id }}">{{ modalidad.nombre }} (${{ modalidad.precio }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Cambio</button>
+        <a href="{% url 'socios:listar_socios' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

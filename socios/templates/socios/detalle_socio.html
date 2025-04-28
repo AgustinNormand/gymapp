@@ -14,7 +14,12 @@
                 <strong>Estado de Cuota:</strong> 
                 <span class="badge bg-{{ color_cuota }}">{{ estado_cuota }}</span>
             </p>
-            
+            {% if modalidad_actual %}
+            <p class="card-text"><strong>Modalidad Actual:</strong> {{ modalidad_actual.modalidad.nombre }} (${{ modalidad_actual.precio_en_el_momento }})</p>
+            {% else %}
+            <p class="card-text"><strong>Modalidad Actual:</strong> No asignada</p>
+            {% endif %}
+
         </div>
     </div>
 
@@ -42,6 +47,42 @@
         </tbody>
     </table>
 
+    <h3>Historial de Modalidades</h3>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Fecha Inicio</th>
+                <th>Fecha Fin</th>
+                <th>Modalidad</th>
+                <th>Precio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cambio in historial_modalidades %}
+                <tr>
+                    <td>{{ cambio.fecha_inicio|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if cambio.fecha_fin %}
+                            {{ cambio.fecha_fin|date:"d/m/Y" }}
+                        {% else %}
+                            Actual
+                        {% endif %}
+                    </td>
+                    <td>{{ cambio.modalidad.nombre }}</td>
+                    <td>${{ cambio.precio_en_el_momento }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No hay historial de modalidades registrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
     <a href="{% url 'socios:listar_socios' %}" class="btn btn-secondary mt-3">Volver</a>
 </div>
 {% endblock %}
+
+
