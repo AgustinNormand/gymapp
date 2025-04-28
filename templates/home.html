@@ -1,9 +1,37 @@
 {% extends 'base.html' %}
 
-{% block title %}Bienvenido a Gym Manager{% endblock %}
+{% block title %}Inicio - CINAF{% endblock %}
 
 {% block content %}
-    <h1>Bienvenido a Gym Manager 🏋️‍♂️</h1>
-    <p>¡Gestioná tu gimnasio de forma fácil y rápida!</p>
-    <p><a href="/socios/alta/" class="btn btn-primary">Dar de alta un socio</a></p>
+<div class="container">
+    <h1 class="mb-4">Dashboard</h1>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Socios Activos</h5>
+                    <p class="card-text fs-3">{{ total_socios }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-white bg-info mb-3 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Asistencias Hoy</h5>
+                    <p class="card-text fs-3">{{ asistencias_hoy }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Pagos del Mes</h5>
+                    <p class="card-text fs-3">${{ total_pagos_mes|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

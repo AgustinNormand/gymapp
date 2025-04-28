@@ -1,4 +1,4 @@
-# Gym Management APP
+# CINAF Management APP
 
 ## Django 
 ### Run Migrations for an app
@@ -37,7 +37,6 @@ Password: admin123
 [] Mostrar una alerta cuando se carga una asistencia, que ya vino más de lo que podía, por semana
 
 ### Visual
-[] Renombrar Gym Manager a Cinaf
 [] Agregar logo de Cinaf
 
 ### Data
