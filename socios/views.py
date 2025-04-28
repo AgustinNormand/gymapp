@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
 from .models import Socio
 from pagos.models import Pago
-
+from datetime import date, timedelta
 
 def alta_socio(request):
     if request.method == 'POST':
@@ -49,6 +49,31 @@ def editar_socio(request, id):
 
 def detalle_socio(request, id):
     socio = get_object_or_404(Socio, id=id)
-    pagos = Pago.objects.filter(socio=socio).order_by('-fecha_pago')  # Últimos pagos primero
-    return render(request, 'socios/detalle_socio.html', {'socio': socio, 'pagos': pagos})
+    pagos = Pago.objects.filter(socio=socio).order_by('-fecha_pago')
+
+    estado_cuota = 'Sin pagos registrados'
+    color_cuota = 'secondary'
+
+    if pagos.exists():
+        ultimo_pago = pagos.first()
+        hoy = date.today()
+        fecha_vencimiento = ultimo_pago.fecha_vencimiento
+
+        if fecha_vencimiento >= hoy + timedelta(days=5):
+            estado_cuota = 'Al día'
+            color_cuota = 'success'
+        elif hoy <= fecha_vencimiento < hoy + timedelta(days=5):
+            estado_cuota = 'Por vencer'
+            color_cuota = 'warning'
+        else:
+            estado_cuota = 'Vencido'
+            color_cuota = 'danger'
+
+    return render(request, 'socios/detalle_socio.html', {
+        'socio': socio,
+        'pagos': pagos,
+        'estado_cuota': estado_cuota,
+        'color_cuota': color_cuota,
+    })
+
 

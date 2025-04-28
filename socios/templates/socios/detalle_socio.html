@@ -10,6 +10,11 @@
             <p class="card-text"><strong>DNI:</strong> {{ socio.dni }}</p>
             <p class="card-text"><strong>Teléfono:</strong> {{ socio.telefono }}</p>
             <p class="card-text"><strong>Email:</strong> {{ socio.email }}</p>
+            <p class="card-text">
+                <strong>Estado de Cuota:</strong> 
+                <span class="badge bg-{{ color_cuota }}">{{ estado_cuota }}</span>
+            </p>
+            
         </div>
     </div>
 
