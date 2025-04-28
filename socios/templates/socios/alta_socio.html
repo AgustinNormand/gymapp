@@ -6,7 +6,21 @@
     <h2>Alta de Socio</h2>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        {% for field in form %}
+        <div class="mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label">
+            {{ field.label }}
+            {% if not field.field.required %}
+                <small class="text-muted">(opcional)</small>
+            {% endif %}
+            </label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="text-danger">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
         <button type="submit" class="btn btn-primary">Registrar Socio</button>
     </form>
 {% endblock %}

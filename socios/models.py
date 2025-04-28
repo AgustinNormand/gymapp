@@ -3,9 +3,9 @@ from django.db import models
 class Socio(models.Model):
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
-    dni = models.CharField(max_length=20, unique=True)
-    email = models.EmailField(unique=True)
-    telefono = models.CharField(max_length=20, blank=True)
+    dni = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    email = models.EmailField(unique=True, blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
     fecha_alta = models.DateField(auto_now_add=True)
 
     def __str__(self):
