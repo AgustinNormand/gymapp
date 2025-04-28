@@ -2,6 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import SocioForm
 from .models import Socio
 from django.contrib import messages
+from django.shortcuts import render, get_object_or_404
+from .models import Socio
+from pagos.models import Pago
+
 
 def alta_socio(request):
     if request.method == 'POST':
@@ -42,3 +46,9 @@ def editar_socio(request, id):
     else:
         form = SocioForm(instance=socio)
     return render(request, 'socios/editar_socio.html', {'form': form})
+
+def detalle_socio(request, id):
+    socio = get_object_or_404(Socio, id=id)
+    pagos = Pago.objects.filter(socio=socio).order_by('-fecha_pago')  # Últimos pagos primero
+    return render(request, 'socios/detalle_socio.html', {'socio': socio, 'pagos': pagos})
+
