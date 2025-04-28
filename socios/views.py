@@ -23,7 +23,37 @@ def alta_socio(request):
 
 def listar_socios(request):
     socios = Socio.objects.all()
-    return render(request, 'socios/listar_socios.html', {'socios': socios})
+
+    socios_info = []
+    hoy = date.today()
+
+    for socio in socios:
+        pagos = Pago.objects.filter(socio=socio).order_by('-fecha_pago')
+
+        estado_cuota = 'Sin pagos'
+        color_cuota = 'secondary'
+
+        if pagos.exists():
+            ultimo_pago = pagos.first()
+            fecha_vencimiento = ultimo_pago.fecha_vencimiento
+
+            if fecha_vencimiento >= hoy + timedelta(days=5):
+                estado_cuota = 'Al día'
+                color_cuota = 'success'
+            elif hoy <= fecha_vencimiento < hoy + timedelta(days=5):
+                estado_cuota = 'Por vencer'
+                color_cuota = 'warning'
+            else:
+                estado_cuota = 'Vencido'
+                color_cuota = 'danger'
+
+        socios_info.append({
+            'socio': socio,
+            'estado_cuota': estado_cuota,
+            'color_cuota': color_cuota,
+        })
+
+    return render(request, 'socios/listar_socios.html', {'socios_info': socios_info})
 
 
 def eliminar_socio(request, id):

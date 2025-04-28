@@ -3,32 +3,45 @@
 {% block title %}Lista de Socios{% endblock %}
 
 {% block content %}
+<div class="container mt-5">
     <h2>Lista de Socios</h2>
-    <table class="table">
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Nombre</th>
                 <th>Apellido</th>
                 <th>Email</th>
+                <th>Teléfono</th>
+                <th>Estado de Cuota</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            {% for socio in socios %}
+            {% for item in socios_info %}
                 <tr>
-                    <td>{{ socio.id }}</td>
-                    <td>{{ socio.nombre }}</td>
-                    <td>{{ socio.apellido }}</td>
-                    <td>{{ socio.email }}</td>
+                    <td>{{ item.socio.id }}</td>
+                    <td>{{ item.socio.nombre }}</td>
+                    <td>{{ item.socio.apellido }}</td>
+                    <td>{{ item.socio.email }}</td>
+                    <td>{{ item.socio.telefono }}</td>
                     <td>
-                        <a href="{% url 'socios:editar_socio' socio.id %}" class="btn btn-warning">Editar</a>
-                        <a href="{% url 'socios:eliminar_socio' socio.id %}" class="btn btn-danger">Eliminar</a>
-                        <a href="{% url 'socios:detalle_socio' socio.id %}" class="btn btn-info btn-sm">Ver Detalle</a>
+                        <span class="badge bg-{{ item.color_cuota }}">
+                            {{ item.estado_cuota }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'socios:editar_socio' item.socio.id %}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="{% url 'socios:eliminar_socio' item.socio.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+                        <a href="{% url 'socios:detalle_socio' item.socio.id %}" class="btn btn-info btn-sm">Ver Detalle</a>
                     </td>
                 </tr>
-                
+            {% empty %}
+                <tr>
+                    <td colspan="6">No hay socios cargados aún.</td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
 {% endblock %}
