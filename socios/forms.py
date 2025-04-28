@@ -39,3 +39,9 @@ class SocioEditForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['dni'].required = False
+        self.fields['email'].required = False
+        self.fields['telefono'].required = False

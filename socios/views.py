@@ -10,6 +10,8 @@ from modalidades.models import Modalidad, HistorialModalidad
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import SocioEditForm  # Importar el form correcto
+from django.db.models import BooleanField, Case, When, Value
+
 
 
 def alta_socio(request):
@@ -125,7 +127,14 @@ def detalle_socio(request, id):
     ).order_by('-fecha_inicio').first()
 
     # Historial de modalidades
-    historial_modalidades = HistorialModalidad.objects.filter(socio=socio).order_by('-fecha_inicio')
+    historial_modalidades = socio.historial_modalidades.annotate(
+        es_actual=Case(
+            When(fecha_fin__isnull=True, then=Value(True)),
+            default=Value(False),
+            output_field=BooleanField(),
+        )
+    ).order_by('-es_actual', '-fecha_inicio')
+
 
     return render(request, 'socios/detalle_socio.html', {
         'socio': socio,

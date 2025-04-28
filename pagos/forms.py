@@ -1,19 +1,13 @@
 from django import forms
 from .models import Pago
-from datetime import date, timedelta
+from datetime import date
 
 class PagoForm(forms.ModelForm):
-    modalidad_actual = forms.CharField(
-        label='Modalidad',
-        required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control-plaintext', 'readonly': 'readonly'})
-    )
-
     class Meta:
         model = Pago
-        fields = ['socio', 'modalidad_actual', 'monto', 'fecha_vencimiento']
+        fields = ['socio', 'monto', 'fecha_vencimiento']  # Solo campos del modelo
         widgets = {
-            'socio': forms.Select(attrs={'class': 'form-control-plaintext', 'readonly': 'readonly', 'disabled': 'disabled'}),
+            'socio': forms.Select(attrs={'class': 'form-control-plaintext', 'readonly': 'readonly'}),
             'monto': forms.NumberInput(attrs={'class': 'form-control-plaintext', 'readonly': 'readonly'}),
             'fecha_vencimiento': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }
@@ -23,4 +17,3 @@ class PagoForm(forms.ModelForm):
         if fecha_vencimiento and fecha_vencimiento < date.today():
             raise forms.ValidationError("La fecha de vencimiento no puede ser anterior a hoy.")
         return fecha_vencimiento
-
