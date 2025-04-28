@@ -11,3 +11,12 @@ class Socio(models.Model):
 
     def __str__(self):
         return f"{self.nombre} {self.apellido} (DNI: {self.dni})"
+
+class Pago(models.Model):
+    socio = models.ForeignKey(Socio, on_delete=models.CASCADE)
+    fecha_pago = models.DateField(auto_now_add=True)
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha_vencimiento = models.DateField()
+
+    def __str__(self):
+        return f"Pago de {self.socio.nombre} {self.socio.apellido} - {self.monto} - {self.fecha_pago.strftime('%d/%m/%Y')}"

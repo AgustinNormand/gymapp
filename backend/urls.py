@@ -28,7 +28,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('socios/', include('socios.urls')),
     path('registros/', include('registros.urls')),
-
+    path('pagos/', include('pagos.urls')),
 ]
 
 # Solo en modo DEBUG, servir archivos estáticos
