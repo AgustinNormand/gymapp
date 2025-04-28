@@ -9,7 +9,7 @@
         <div class="col-md-4">
             <div class="card text-white bg-success mb-3 shadow">
                 <div class="card-body">
-                    <h5 class="card-title">Socios Activos</h5>
+                    <h5 class="card-title">Socios Totales</h5>
                     <p class="card-text fs-3">{{ total_socios }}</p>
                 </div>
             </div>
@@ -33,5 +33,64 @@
             </div>
         </div>
     </div>
+
+    <!-- Gráfico de Asistencias por Hora -->
+    <h2 class="mt-5">Asistencias por Hora</h2>
+
+    <form method="get" class="row g-3 align-items-center mb-4">
+        <div class="col-auto">
+            <label for="filtro" class="col-form-label">Ver asistencias de:</label>
+        </div>
+        <div class="col-auto">
+            <select id="filtro" name="filtro" class="form-select" onchange="this.form.submit()">
+                <option value="hoy" {% if filtro == 'hoy' %}selected{% endif %}>Hoy</option>
+                <option value="semana" {% if filtro == 'semana' %}selected{% endif %}>Últimos 7 días</option>
+                <option value="mes" {% if filtro == 'mes' %}selected{% endif %}>Este mes</option>
+            </select>
+        </div>
+    </form>
+
+    <div class="card shadow p-4 mb-5">
+        <canvas id="asistenciasHoraChart" height="100"></canvas>
+    </div>
+
+    <script>
+    var ctx = document.getElementById('asistenciasHoraChart').getContext('2d');
+    var asistenciasChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ horas|safe }},
+            datasets: [{
+                label: 'Cantidad de Asistencias ({{ filtro|title }})',
+                data: {{ cantidades|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Hora del Día'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    </script>
+
 </div>
 {% endblock %}

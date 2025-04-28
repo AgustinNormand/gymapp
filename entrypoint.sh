@@ -16,4 +16,5 @@ echo "✅ Recolectando archivos estáticos..."
 python manage.py collectstatic --noinput
 
 echo "✅ Levantando Gunicorn..."
-gunicorn backend.wsgi:application --bind 0.0.0.0:8000
+gunicorn backend.wsgi:application --bind 0.0.0.0:8000 # Prod?
+#python manage.py runserver 0.0.0.0:8000 # Dev?
