@@ -18,20 +18,15 @@ docker-compose up --build
 ### Build a new app
 docker-compose run web python manage.py startapp pagos
 
-## Info
-### Supersuer
-Username: admin
-Password: admin123
-
 ## Pending Tasks
 ### Infra
 [] Add Nginx to production scope
 [] Add volume to Postgres to save information
-[] Backup postgres information
+[] Backup postgres information, to avoid SPOF
 [] Add .env.example file and add to .gitignore .env file
 
 ### Functional
-[] Mejorar el registro de asistencias, para que sea más rápido cargar
+[] Mejorar el registro de asistencias, para que sea más rápido cargar, poder ver las observaciones y los pesos de los presentes. (Implementar una vista con toda esta info)
 [] Ver de crear distintos usuarios, con roles diferentes, para los distintos profes
 [] Mostrar una alerta cuando se carga una asistencia, de alguien que no pagó
 [] Mostrar una alerta cuando se carga una asistencia, que ya vino más de lo que podía, por semana
@@ -40,7 +35,7 @@ Password: admin123
 [] Agregar logo de Cinaf
 
 ### Data
-[] Migrar los usuarios de las sheet de Nico, a la DB
+[] Hacer un doble click en los datos migrados desde la sheet, para corregir errores. (Los migré medio a los cachetazos)
 
 ### Dash
 [] Agregar info de, usuarios no pagos, ausentes

@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('socios', '0003_populate_socios'),
+        ('socios', '0002_alter_socio_dni_alter_socio_email_and_more'),
     ]
 
     operations = [
