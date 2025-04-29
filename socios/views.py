@@ -8,6 +8,8 @@ from modalidades.models import Modalidad, HistorialModalidad
 from django.utils import timezone
 from django.db.models import BooleanField, Case, When, Value
 from django.db import models
+from ejercicios.models import Ejercicio, RegistroEjercicio
+
 
 def alta_socio(request):
     if request.method == 'POST':
@@ -138,6 +140,22 @@ def detalle_socio(request, id):
         fecha_fin__lt=hoy
     ).order_by('-fecha_inicio')
 
+    ejercicios = Ejercicio.objects.all()
+    ejercicio_id = request.GET.get('ejercicio_id')
+
+    registros_ejercicio = None
+    ejercicio_seleccionado = None
+
+    if ejercicio_id:
+        try:
+            ejercicio_seleccionado = Ejercicio.objects.get(id=ejercicio_id)
+            registros_ejercicio = RegistroEjercicio.objects.filter(
+                socio=socio,
+                ejercicio=ejercicio_seleccionado
+            ).order_by('fecha')
+        except Ejercicio.DoesNotExist:
+            registros_ejercicio = None
+
     return render(request, 'socios/detalle_socio.html', {
         'socio': socio,
         'pagos': pagos,
@@ -147,6 +165,9 @@ def detalle_socio(request, id):
         'historial_modalidades': historial_modalidades,
         'observaciones_activas': observaciones_activas,
         'observaciones_pasadas': observaciones_pasadas,
+        'ejercicios': ejercicios,
+        'registros_ejercicio': registros_ejercicio,
+        'ejercicio_seleccionado': ejercicio_seleccionado,
     })
 
 

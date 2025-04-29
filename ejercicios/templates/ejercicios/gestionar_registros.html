@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestionar Ejercicios{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Gestionar Ejercicios para {{ socio.nombre }} {{ socio.apellido }}</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Agregar Nuevo Registro</h4>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="ejercicio">Ejercicio</label>
+                        <select name="ejercicio" id="ejercicio" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for ejercicio in ejercicios %}
+                                <option value="{{ ejercicio.id }}">{{ ejercicio.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="fecha">Fecha</label>
+                        <input type="date" name="fecha" id="fecha" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="peso">Peso (kg)</label>
+                        <input type="number" step="0.01" name="peso" id="peso" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-success">Agregar Registro</button>
+                    <a href="{% url 'socios:listar_socios' %}" class="btn btn-secondary">Volver a Socios</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <h4>Registros Existentes</h4>
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Ejercicio</th>
+                <th>Fecha</th>
+                <th>Peso (kg)</th>
+                <th>Acciones</th> <!-- Nuevo -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for registro in registros %}
+                <tr>
+                    <td>{{ registro.ejercicio.nombre }}</td>
+                    <td>{{ registro.fecha|date:"d/m/Y" }}</td>
+                    <td>{{ registro.peso }}</td>
+                    <td>
+                        <a href="{% url 'ejercicios:editar_registro' registro.id %}" class="btn btn-sm btn-warning">Editar</a>
+                        <a href="{% url 'ejercicios:borrar_registro' registro.id %}" class="btn btn-sm btn-danger"
+                           onclick="return confirm('¿Seguro que querés borrar este registro?');">Borrar</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No hay registros cargados aún.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

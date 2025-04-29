@@ -29,6 +29,7 @@ urlpatterns = [
     path('socios/', include('socios.urls')),
     path('registros/', include('registros.urls')),
     path('pagos/', include('pagos.urls')),
+    path('ejercicios/', include('ejercicios.urls')),
 ]
 
 # Solo en modo DEBUG, servir archivos estáticos

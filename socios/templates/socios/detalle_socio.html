@@ -113,6 +113,42 @@
         <p>No hay observaciones pasadas.</p>
     {% endif %}
 
+    <h3>Historial de Ejercicios</h3>
+
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <select name="ejercicio_id" class="form-select">
+                <option value="">-- Seleccionar ejercicio --</option>
+                {% for ejercicio in ejercicios %}
+                    <option value="{{ ejercicio.id }}" {% if ejercicio_seleccionado and ejercicio.id == ejercicio_seleccionado.id %}selected{% endif %}>
+                        {{ ejercicio.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-outline-primary">Filtrar</button>
+        </div>
+    </form>
+
+    {% if registros_ejercicio %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Peso (kg)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for registro in registros_ejercicio %}
+                    <tr>
+                        <td>{{ registro.fecha|date:"d/m/Y" }}</td>
+                        <td>{{ registro.peso }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% elif ejercicio_seleccionado %}
+        <p>No hay registros para el ejercicio seleccionado.</p>
+    {% endif %}
 
 
     <a href="{% url 'socios:listar_socios' %}" class="btn btn-secondary mt-3">Volver</a>

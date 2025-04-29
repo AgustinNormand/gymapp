@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Registro de Ejercicio{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Editar Registro de {{ registro.socio.nombre }} {{ registro.socio.apellido }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label>Ejercicio</label>
+            <input type="text" class="form-control" value="{{ registro.ejercicio.nombre }}" disabled>
+        </div>
+
+        <div class="mb-3">
+            <label>Fecha</label>
+            <input type="date" name="fecha" class="form-control" value="{{ registro.fecha|date:'Y-m-d' }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Peso (kg)</label>
+            <input type="number" step="0.01" name="peso" class="form-control" value="{{ registro.peso }}" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <a href="{% url 'ejercicios:gestionar_registros' registro.socio.id %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

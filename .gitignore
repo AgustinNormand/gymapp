@@ -4,3 +4,4 @@ staticfiles/admin/css/*
 
 backend/__pycache__/*
 .env
+zcripts/*
