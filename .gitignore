@@ -3,3 +3,4 @@ staticfiles/admin/img/*
 staticfiles/admin/css/*
 
 backend/__pycache__/*
+.env
