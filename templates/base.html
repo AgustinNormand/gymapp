@@ -17,27 +17,49 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Menú principal -->
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Inicio</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/socios/alta/' %}active{% endif %}" href="/socios/alta/">Registrar Socio</a>
+                    
+                    <!-- Socios -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if '/socios' in request.path %}active{% endif %}" href="#" id="navbarSocios" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Socios
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarSocios">
+                            <li><a class="dropdown-item" href="{% url 'socios:listar_socios' %}">Ver Socios</a></li>
+                            <li><a class="dropdown-item" href="{% url 'socios:alta_socio' %}">Registrar Socio</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/socios/' %}active{% endif %}" href="{% url 'socios:listar_socios' %}">Ver Socios</a>
+                    
+                    <!-- Asistencias -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if '/registros' in request.path %}active{% endif %}" href="#" id="navbarAsistencias" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Asistencias
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarAsistencias">
+                            <li><a class="dropdown-item" href="{% url 'registrar_entrada' %}">Registrar Asistencia</a></li>
+                            <li><a class="dropdown-item" href="{% url 'listar_entradas' %}">Ver Asistencias</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/registros/registrar/' %}active{% endif %}" href="{% url 'registrar_entrada' %}">Registrar Asistencia</a>
+            
+                    <!-- Pagos -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if '/pagos' in request.path %}active{% endif %}" href="#" id="navbarPagos" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Pagos
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarPagos">
+                            <li><a class="dropdown-item" href="{% url 'pagos:listar_pagos' %}">Ver Pagos</a></li>
+                        </ul>
                     </li>
+                </ul>
+            
+                <!-- Menú de la derecha -->
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/registros/entradas/' %}active{% endif %}" href="{% url 'listar_entradas' %}">Ver Asistencias</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/pagos/listar/' %}active{% endif %}" href="{% url 'pagos:listar_pagos' %}">Ver Pagos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/admin/' %}active{% endif %}" href="/admin/">Admin</a>
+                        <a class="nav-link {% if '/admin' in request.path %}active{% endif %}" href="/admin/">Admin</a>
                     </li>
                 </ul>
             </div>
