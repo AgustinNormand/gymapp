@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.db.models import BooleanField, Case, When, Value
 from django.db import models
 from ejercicios.models import Ejercicio, RegistroEjercicio
+from django.db.models import Q
 
 
 def alta_socio(request):
@@ -38,7 +39,14 @@ def alta_socio(request):
 
 
 def listar_socios(request):
+    query = request.GET.get('q') or ''
+
     socios = Socio.objects.all()
+
+    if query:
+        socios = socios.filter(
+            Q(nombre__icontains=query) | Q(apellido__icontains=query)
+        )
 
     socios_info = []
     hoy = date.today()
@@ -69,7 +77,11 @@ def listar_socios(request):
             'color_cuota': color_cuota,
         })
 
-    return render(request, 'socios/listar_socios.html', {'socios_info': socios_info})
+    return render(request, 'socios/listar_socios.html', {
+        'socios_info': socios_info,
+        'query': query,  # 👈 Le pasamos el query al template también
+    })
+
 
 
 def eliminar_socio(request, id):
