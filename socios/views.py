@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+
+from registros.models import RegistroEntrada
 from .forms import SocioForm, SocioEditForm, ObservacionForm
 from .models import Socio, Observacion
 from django.contrib import messages
@@ -10,6 +12,7 @@ from django.db.models import BooleanField, Case, When, Value
 from django.db import models
 from ejercicios.models import Ejercicio, RegistroEjercicio
 from django.db.models import Q
+from django.http import JsonResponse
 
 
 def alta_socio(request):
@@ -52,7 +55,7 @@ def listar_socios(request):
     hoy = date.today()
 
     for socio in socios:
-        pagos = Pago.objects.filter(socio=socio).order_by('-fecha_pago')
+        pagos = Pago.objects.filter(socio=socio).order_by('-fecha_vencimiento')
 
         estado_cuota = 'Sin pagos'
         color_cuota = 'secondary'
@@ -107,7 +110,9 @@ def editar_socio(request, id):
     return render(request, 'socios/editar_socio.html', {'form': form})
 
 
+
 def detalle_socio(request, id):
+    # Pagos del socio
     socio = get_object_or_404(Socio, id=id)
     pagos = Pago.objects.filter(socio=socio).order_by('-fecha_pago')
 
@@ -115,6 +120,7 @@ def detalle_socio(request, id):
     color_cuota = 'secondary'
 
     if pagos.exists():
+        pagos = Pago.objects.filter(socio=socio).order_by('-fecha_vencimiento')
         ultimo_pago = pagos.first()
         hoy = date.today()
         fecha_vencimiento = ultimo_pago.fecha_vencimiento
@@ -129,6 +135,7 @@ def detalle_socio(request, id):
             estado_cuota = 'Vencido'
             color_cuota = 'danger'
 
+    # Modalidad e historial de modalidades
     modalidad_actual = HistorialModalidad.objects.filter(
         socio=socio, fecha_fin__isnull=True
     ).order_by('-fecha_inicio').first()
@@ -141,17 +148,19 @@ def detalle_socio(request, id):
         )
     ).order_by('-es_actual', '-fecha_inicio')
 
-    # 🔥 NUEVO: Cargar observaciones
+
+    # Observaciones de los usuarios
     hoy = timezone.now().date()
 
-    observaciones_activas = socio.observaciones.filter(
-        models.Q(fecha_fin__isnull=True) | models.Q(fecha_fin__gte=hoy)
-    ).order_by('fecha_inicio')
-
-    observaciones_pasadas = socio.observaciones.filter(
-        fecha_fin__lt=hoy
+    observaciones = socio.observaciones.annotate(
+        activa=Case(
+            When(models.Q(fecha_fin__isnull=True) | models.Q(fecha_fin__gte=hoy), then=Value(True)),
+            default=Value(False),
+            output_field=BooleanField()
+        )
     ).order_by('-fecha_inicio')
 
+    ## Ejercicios y los pesos del usuario
     ejercicios = Ejercicio.objects.all()
     ejercicio_id = request.GET.get('ejercicio_id')
 
@@ -168,6 +177,29 @@ def detalle_socio(request, id):
         except Ejercicio.DoesNotExist:
             registros_ejercicio = None
 
+    # Asistencias
+    asistencias = RegistroEntrada.objects.filter(socio=socio).order_by('-fecha_hora')
+
+    # Método llamado desde AJAX, devolvemos JSON
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        ejercicios_pesos = [
+            {
+                'nombre': reg.ejercicio.nombre,
+                'peso': str(reg.peso)
+            }
+            for reg in RegistroEjercicio.objects.filter(socio=socio)
+        ]
+
+        data = {
+            'nombre_completo': f"{socio.apellido} {socio.nombre}",
+            'estado_cuota': estado_cuota,
+            'color_cuota': color_cuota,
+            'observaciones': observaciones,
+            'ejercicios': ejercicios_pesos,
+        }
+        return JsonResponse(data)
+
+    # Si no es AJAX, seguimos devolviendo el HTML como siempre
     return render(request, 'socios/detalle_socio.html', {
         'socio': socio,
         'pagos': pagos,
@@ -175,12 +207,13 @@ def detalle_socio(request, id):
         'color_cuota': color_cuota,
         'modalidad_actual': modalidad_actual,
         'historial_modalidades': historial_modalidades,
-        'observaciones_activas': observaciones_activas,
-        'observaciones_pasadas': observaciones_pasadas,
+        'observaciones': observaciones,
         'ejercicios': ejercicios,
         'registros_ejercicio': registros_ejercicio,
         'ejercicio_seleccionado': ejercicio_seleccionado,
+        'asistencias': asistencias,
     })
+
 
 
 def cambiar_modalidad(request, socio_id):

@@ -1,23 +1,46 @@
 from django.shortcuts import render, redirect
-from .forms import RegistroEntradaForm
 from django.contrib import messages
 from .models import RegistroEntrada
 from datetime import date
 from django.db.models import Q
 import csv
 from django.http import HttpResponse
+from django.http import JsonResponse
+from socios.models import Socio, Observacion
+from pagos.models import Pago
+from ejercicios.models import RegistroEjercicio
+from .models import RegistroEntrada
+from django.utils.timezone import now
+from datetime import timedelta
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.http import JsonResponse
+from socios.models import Socio
+from registros.models import RegistroEntrada
+from socios.models import Socio
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.shortcuts import render
+from django.http import JsonResponse
+from socios.models import Socio, Observacion
+from pagos.models import Pago
+from ejercicios.models import RegistroEjercicio
+from .models import RegistroEntrada
+from django.db.models import Q
+from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from socios.models import Socio, Observacion
+from pagos.models import Pago
+from ejercicios.models import RegistroEjercicio
+from registros.models import RegistroEntrada
+from django.utils.timezone import now
+import json
 
-
-def registrar_entrada(request):
-    if request.method == 'POST':
-        form = RegistroEntradaForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Entrada registrada correctamente.')
-            return redirect('registrar_entrada')
-    else:
-        form = RegistroEntradaForm()
-    return render(request, 'registros/registrar_entrada.html', {'form': form})
+def vista_registrar_asistencia(request):
+    return render(request, 'registros/registrar_asistencia.html')
 
 
 def listar_entradas(request):
@@ -53,39 +76,85 @@ def listar_entradas(request):
         'socio': socio or '',
     })
 
+def buscar_socios(request):
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return JsonResponse([], safe=False)
 
-def exportar_entradas_csv(request):
-    fecha_desde = request.GET.get('fecha_desde')
-    fecha_hasta = request.GET.get('fecha_hasta')
-    socio = request.GET.get('socio')
+    socios = Socio.objects.filter(
+        Q(nombre__icontains=query) | Q(apellido__icontains=query)
+    ).order_by('apellido')[:10]
 
-    entradas = RegistroEntrada.objects.all()
+    resultados = [
+        {
+            'id': socio.id,
+            'nombre_completo': f"{socio.apellido} {socio.nombre}",
+        }
+        for socio in socios
+    ]
+    return JsonResponse(resultados, safe=False)
 
-    if fecha_desde:
-        entradas = entradas.filter(fecha_hora__date__gte=fecha_desde)
+@csrf_exempt
+def registrar_asistencia_ajax(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-    if fecha_hasta:
-        entradas = entradas.filter(fecha_hora__date__lte=fecha_hasta)
+    try:
+        data = json.loads(request.body)
+        socio_id = data.get('id')
 
-    if socio:
-        entradas = entradas.filter(
-            Q(socio__nombre__icontains=socio) | 
-            Q(socio__apellido__icontains=socio)
+        socio = Socio.objects.get(id=socio_id)
+
+        # 🛠️ Crear el registro de asistencia y guardar el ID
+        registro = RegistroEntrada.objects.create(socio=socio)
+
+        # Estado de cuota
+        pagos = Pago.objects.filter(socio=socio).order_by('-fecha_vencimiento')
+        cuota = "Sin pagos" if not pagos else (
+            "Al día" if pagos.first().fecha_vencimiento >= now().date() else "Vencida"
         )
 
-    # Crear el archivo CSV
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="entradas.csv"'
+        # Observaciones activas
+        obs_activas = socio.observaciones.filter(
+            fecha_fin__isnull=True
+        ).values_list('descripcion', flat=True)
 
-    writer = csv.writer(response)
-    writer.writerow(['Socio', 'Fecha', 'Hora'])
+        # Pesos cargados
+        ejercicios = RegistroEjercicio.objects.filter(socio=socio).order_by('ejercicio__nombre')
+        pesos = {
+            reg.ejercicio.nombre: float(reg.peso)
+            for reg in ejercicios
+        }
 
-    for entrada in entradas:
-        writer.writerow([
-            f"{entrada.socio.nombre} {entrada.socio.apellido}",
-            entrada.fecha_hora.strftime('%d/%m/%Y'),
-            entrada.fecha_hora.strftime('%H:%M')
-        ])
+        return JsonResponse({
+            'socio': f"{socio.apellido} {socio.nombre}",
+            'cuota': cuota,
+            'observaciones': list(obs_activas),
+            'pesos': pesos,
+            'registro_id': registro.id  # 👈🔥 ACÁ DEVOLVEMOS EL ID DEL REGISTRO
+        })
 
-    return response
+    except Socio.DoesNotExist:
+        return JsonResponse({'error': 'Socio no encontrado'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt  # (Idealmente, después mejoramos seguridad con CSRF Token también)
+@require_POST
+def borrar_asistencia_ajax(request):
+    try:
+        data = json.loads(request.body)
+        registro_id = data.get('registro_id')
+
+        registro = RegistroEntrada.objects.get(id=registro_id)
+        registro.delete()
+
+        return JsonResponse({'status': 'ok'})
+    except RegistroEntrada.DoesNotExist:
+        return JsonResponse({'error': 'Asistencia no encontrada'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
 

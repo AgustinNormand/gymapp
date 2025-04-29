@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <h3>Pagos Realizados</h3>
+    <h3>Historial de Pagos</h3>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -80,44 +80,48 @@
         </tbody>
     </table>
 
-    <h3>Observaciones Activas</h3>
+    <h3>Historial de Asistencias</h3>
 
-    {% if observaciones_activas %}
+    {% if asistencias %}
         <ul class="list-group mb-4">
-            {% for observacion in observaciones_activas %}
+            {% for asistencia in asistencias %}
                 <li class="list-group-item">
+                    {{ asistencia.fecha_hora|date:"d/m/Y H:i" }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay asistencias registradas.</p>
+    {% endif %}
+
+
+    <h3>Historial de Observaciones</h3>
+
+    {% if observaciones %}
+        <ul class="list-group mb-4">
+            {% for observacion in observaciones %}
+                <li class="list-group-item {% if observacion.activa %}list-group-item-warning{% else %}list-group-item-light{% endif %}">
                     {{ observacion.descripcion }}<br>
-                    <small>Desde: {{ observacion.fecha_inicio|date:"d/m/Y" }}</small>
-                    {% if observacion.fecha_fin %}
-                        <br><small>Hasta: {{ observacion.fecha_fin|date:"d/m/Y" }}</small>
+                    <small>
+                        Desde: {{ observacion.fecha_inicio|date:"d/m/Y" }}
+                        {% if observacion.fecha_fin %} hasta {{ observacion.fecha_fin|date:"d/m/Y" }}{% endif %}
+                    </small>
+                    {% if observacion.activa %}
+                        <span class="badge bg-warning text-dark ms-2">Activa</span>
                     {% endif %}
                 </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>No hay observaciones activas.</p>
+        <p>No hay observaciones registradas.</p>
     {% endif %}
 
-    <h3>Historial de Observaciones</h3>
-
-    {% if observaciones_pasadas %}
-        <ul class="list-group">
-            {% for observacion in observaciones_pasadas %}
-                <li class="list-group-item">
-                    {{ observacion.descripcion }}<br>
-                    <small>Desde: {{ observacion.fecha_inicio|date:"d/m/Y" }}{% if observacion.fecha_fin %} hasta {{ observacion.fecha_fin|date:"d/m/Y" }}{% endif %}</small>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No hay observaciones pasadas.</p>
-    {% endif %}
 
     <h3>Historial de Ejercicios</h3>
 
-    <form method="get" class="mb-4">
+    <form method="get" class="mb-4" id="form-ejercicio">
         <div class="input-group">
-            <select name="ejercicio_id" class="form-select">
+            <select name="ejercicio_id" class="form-select" onchange="document.getElementById('form-ejercicio').submit()">
                 <option value="">-- Seleccionar ejercicio --</option>
                 {% for ejercicio in ejercicios %}
                     <option value="{{ ejercicio.id }}" {% if ejercicio_seleccionado and ejercicio.id == ejercicio_seleccionado.id %}selected{% endif %}>
@@ -125,7 +129,6 @@
                     </option>
                 {% endfor %}
             </select>
-            <button type="submit" class="btn btn-outline-primary">Filtrar</button>
         </div>
     </form>
 
