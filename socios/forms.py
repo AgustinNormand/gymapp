@@ -1,5 +1,5 @@
 from django import forms
-from .models import Socio
+from .models import Socio, Observacion
 from modalidades.models import Modalidad
 
 class SocioForm(forms.ModelForm):
@@ -45,3 +45,19 @@ class SocioEditForm(forms.ModelForm):
         self.fields['dni'].required = False
         self.fields['email'].required = False
         self.fields['telefono'].required = False
+
+
+class ObservacionForm(forms.ModelForm):
+    class Meta:
+        model = Observacion
+        fields = ['descripcion', 'fecha_inicio', 'fecha_fin']
+        widgets = {
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'fecha_inicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_fin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['fecha_fin'].required = False  # (por si acaso aseguramos que no sea requerido)
+        self.fields['fecha_fin'].label = 'Fecha de Fin (opcional)'

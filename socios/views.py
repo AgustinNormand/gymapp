@@ -1,18 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import SocioForm
-from .models import Socio
+from .forms import SocioForm, SocioEditForm, ObservacionForm
+from .models import Socio, Observacion
 from django.contrib import messages
-from django.shortcuts import render, get_object_or_404
-from .models import Socio
 from pagos.models import Pago
 from datetime import date, timedelta
 from modalidades.models import Modalidad, HistorialModalidad
 from django.utils import timezone
-from django.shortcuts import render, redirect, get_object_or_404
-from .forms import SocioEditForm  # Importar el form correcto
 from django.db.models import BooleanField, Case, When, Value
-
-
+from django.db import models
 
 def alta_socio(request):
     if request.method == 'POST':
@@ -38,7 +33,6 @@ def alta_socio(request):
     else:
         form = SocioForm()
     return render(request, 'socios/alta_socio.html', {'form': form})
-
 
 
 def listar_socios(request):
@@ -121,12 +115,10 @@ def detalle_socio(request, id):
             estado_cuota = 'Vencido'
             color_cuota = 'danger'
 
-    # Modalidad actual
     modalidad_actual = HistorialModalidad.objects.filter(
         socio=socio, fecha_fin__isnull=True
     ).order_by('-fecha_inicio').first()
 
-    # Historial de modalidades
     historial_modalidades = socio.historial_modalidades.annotate(
         es_actual=Case(
             When(fecha_fin__isnull=True, then=Value(True)),
@@ -135,6 +127,16 @@ def detalle_socio(request, id):
         )
     ).order_by('-es_actual', '-fecha_inicio')
 
+    # 🔥 NUEVO: Cargar observaciones
+    hoy = timezone.now().date()
+
+    observaciones_activas = socio.observaciones.filter(
+        models.Q(fecha_fin__isnull=True) | models.Q(fecha_fin__gte=hoy)
+    ).order_by('fecha_inicio')
+
+    observaciones_pasadas = socio.observaciones.filter(
+        fecha_fin__lt=hoy
+    ).order_by('-fecha_inicio')
 
     return render(request, 'socios/detalle_socio.html', {
         'socio': socio,
@@ -143,10 +145,9 @@ def detalle_socio(request, id):
         'color_cuota': color_cuota,
         'modalidad_actual': modalidad_actual,
         'historial_modalidades': historial_modalidades,
+        'observaciones_activas': observaciones_activas,
+        'observaciones_pasadas': observaciones_pasadas,
     })
-
-
-
 
 
 def cambiar_modalidad(request, socio_id):
@@ -179,4 +180,50 @@ def cambiar_modalidad(request, socio_id):
 
     return render(request, 'socios/cambiar_modalidad.html', {'socio': socio, 'modalidades': modalidades})
 
+
+def gestionar_observaciones(request, socio_id):
+    socio = get_object_or_404(Socio, id=socio_id)
+    observaciones = socio.observaciones.all()
+
+    return render(request, 'socios/gestionar_observaciones.html', {
+        'socio': socio,
+        'observaciones': observaciones,
+    })
+
+def crear_observacion(request, socio_id):
+    socio = get_object_or_404(Socio, id=socio_id)
+
+    if request.method == 'POST':
+        form = ObservacionForm(request.POST)
+        if form.is_valid():
+            observacion = form.save(commit=False)
+            observacion.socio = socio
+            observacion.save()
+            return redirect('socios:gestionar_observaciones', socio_id=socio.id)
+    else:
+        form = ObservacionForm()
+
+    return render(request, 'socios/crear_editar_observacion.html', {'form': form, 'socio': socio, 'es_edicion': False})
+
+
+def editar_observacion(request, observacion_id):
+    observacion = get_object_or_404(Observacion, id=observacion_id)
+    socio = observacion.socio
+
+    if request.method == 'POST':
+        form = ObservacionForm(request.POST, instance=observacion)
+        if form.is_valid():
+            form.save()
+            return redirect('socios:gestionar_observaciones', socio_id=socio.id)
+    else:
+        form = ObservacionForm(instance=observacion)
+
+    return render(request, 'socios/crear_editar_observacion.html', {'form': form, 'socio': socio, 'es_edicion': True})
+
+
+def borrar_observacion(request, observacion_id):
+    observacion = get_object_or_404(Observacion, id=observacion_id)
+    socio_id = observacion.socio.id
+    observacion.delete()
+    return redirect('socios:gestionar_observaciones', socio_id=socio_id)
 

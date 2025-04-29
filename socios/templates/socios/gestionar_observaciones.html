@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestionar Observaciones{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Observaciones de {{ socio.nombre }} {{ socio.apellido }}</h2>
+
+    <a href="{% url 'socios:crear_observacion' socio.id %}" class="btn btn-primary mb-3">Crear Nueva Observación</a>
+
+    {% if observaciones %}
+        <ul class="list-group">
+            {% for observacion in observaciones %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        {{ observacion.descripcion }} <br>
+                        <small>Inicio: {{ observacion.fecha_inicio }}{% if observacion.fecha_fin %} - Fin: {{ observacion.fecha_fin }}{% endif %}</small>
+                    </div>
+                    <div>
+                        <a href="{% url 'socios:editar_observacion' observacion.id %}" class="btn btn-sm btn-warning">Editar</a>
+                        <a href="{% url 'socios:borrar_observacion' observacion.id %}" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que querés borrar esta observación?');">Borrar</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay observaciones registradas.</p>
+    {% endif %}
+</div>
+{% endblock %}

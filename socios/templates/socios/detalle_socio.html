@@ -80,6 +80,40 @@
         </tbody>
     </table>
 
+    <h3>Observaciones Activas</h3>
+
+    {% if observaciones_activas %}
+        <ul class="list-group mb-4">
+            {% for observacion in observaciones_activas %}
+                <li class="list-group-item">
+                    {{ observacion.descripcion }}<br>
+                    <small>Desde: {{ observacion.fecha_inicio|date:"d/m/Y" }}</small>
+                    {% if observacion.fecha_fin %}
+                        <br><small>Hasta: {{ observacion.fecha_fin|date:"d/m/Y" }}</small>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay observaciones activas.</p>
+    {% endif %}
+
+    <h3>Historial de Observaciones</h3>
+
+    {% if observaciones_pasadas %}
+        <ul class="list-group">
+            {% for observacion in observaciones_pasadas %}
+                <li class="list-group-item">
+                    {{ observacion.descripcion }}<br>
+                    <small>Desde: {{ observacion.fecha_inicio|date:"d/m/Y" }}{% if observacion.fecha_fin %} hasta {{ observacion.fecha_fin|date:"d/m/Y" }}{% endif %}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay observaciones pasadas.</p>
+    {% endif %}
+
+
 
     <a href="{% url 'socios:listar_socios' %}" class="btn btn-secondary mt-3">Volver</a>
 </div>

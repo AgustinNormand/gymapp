@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if es_edicion %}Editar Observación{% else %}Crear Observación{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>{% if es_edicion %}Editar{% else %}Crear{% endif %} Observación para {{ socio.nombre }} {{ socio.apellido }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">{% if es_edicion %}Actualizar{% else %}Guardar{% endif %}</button>
+        <a href="{% url 'socios:gestionar_observaciones' socio.id %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

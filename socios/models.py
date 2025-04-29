@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 class Socio(models.Model):
     nombre = models.CharField(max_length=100)
@@ -10,12 +11,18 @@ class Socio(models.Model):
 
     def __str__(self):
         return f"{self.nombre} {self.apellido} (DNI: {self.dni})"
+    
+class Observacion(models.Model):
+    socio = models.ForeignKey('Socio', on_delete=models.CASCADE, related_name='observaciones')
+    descripcion = models.TextField()
+    fecha_inicio = models.DateField(default=timezone.now)
+    fecha_fin = models.DateField(null=True, blank=True)
 
-class Pago(models.Model):
-    socio = models.ForeignKey(Socio, on_delete=models.CASCADE)
-    fecha_pago = models.DateField(auto_now_add=True)
-    monto = models.DecimalField(max_digits=10, decimal_places=2)
-    fecha_vencimiento = models.DateField()
+    def esta_activa(self):
+        """Devuelve True si la observación sigue vigente"""
+        return self.fecha_fin is None or self.fecha_fin > timezone.now().date()
 
     def __str__(self):
-        return f"Pago de {self.socio.nombre} {self.socio.apellido} - {self.monto} - {self.fecha_pago.strftime('%d/%m/%Y')}"
+        estado = "Activa" if self.esta_activa() else "Finalizada"
+        return f"{self.descripcion[:30]} ({estado})"
+
