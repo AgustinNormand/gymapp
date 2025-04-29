@@ -69,3 +69,12 @@ docker-compose run web python manage.py startapp pagos
                    [Webserver corriendo]
                            ↓
                   [Healthchecks cada 30s]
+
+
+# Legacy Data Migration
+
+Based in Sheets of actual management, extract CSVs in desired format, and run
+
+docker-compose exec web bash
+python3 legacy_data_migration/scripts/cargar_todo.py
+

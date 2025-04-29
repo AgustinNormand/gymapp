@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('socios', '0005_populate_observaciones'),
+        ('socios', '0004_observacion_delete_pago'),
     ]
 
     operations = [
