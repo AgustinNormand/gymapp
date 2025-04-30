@@ -7,7 +7,13 @@
     <div class="card mb-4">
         <div class="card-body">
             <h5 class="card-title">{{ socio.nombre }} {{ socio.apellido }}</h5>
-            <p class="card-text"><strong>DNI:</strong> {{ socio.dni }}</p>
+            <p class="card-text"><strong>Fecha de Nacimiento:</strong> 
+                {% if socio.fecha_nacimiento %}
+                    {{ socio.fecha_nacimiento|date:"d/m/Y" }}
+                {% else %}
+                    No especificada
+                {% endif %}
+            </p>
             <p class="card-text"><strong>Teléfono:</strong> {{ socio.telefono }}</p>
             <p class="card-text"><strong>Email:</strong> {{ socio.email }}</p>
             <p class="card-text">

@@ -12,39 +12,39 @@ class SocioForm(forms.ModelForm):
 
     class Meta:
         model = Socio
-        fields = ['nombre', 'apellido', 'dni', 'email', 'telefono']
+        fields = ['nombre', 'apellido', 'email', 'telefono', 'fecha_nacimiento']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'apellido': forms.TextInput(attrs={'class': 'form-control'}),
-            'dni': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
+            'fecha_nacimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['dni'].required = False
         self.fields['email'].required = False
         self.fields['telefono'].required = False
+        self.fields['fecha_nacimiento'].required = False
 
 
 class SocioEditForm(forms.ModelForm):
     class Meta:
         model = Socio
-        fields = ['nombre', 'apellido', 'dni', 'email', 'telefono']
+        fields = ['nombre', 'apellido', 'email', 'telefono', 'fecha_nacimiento']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'apellido': forms.TextInput(attrs={'class': 'form-control'}),
-            'dni': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
+            'fecha_nacimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['dni'].required = False
         self.fields['email'].required = False
         self.fields['telefono'].required = False
+        self.fields['fecha_nacimiento'].required = False
 
 
 class ObservacionForm(forms.ModelForm):

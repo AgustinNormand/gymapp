@@ -36,7 +36,7 @@ def cargar_socios_desde_csv(csv_path):
             socio = Socio(
                 nombre=nombre.strip().capitalize(),
                 apellido=apellido.strip().capitalize(),
-                dni=None,
+                fecha_nacimiento=None,
                 email=None,
                 telefono=None
             )

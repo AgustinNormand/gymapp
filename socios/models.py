@@ -4,13 +4,14 @@ from django.utils import timezone
 class Socio(models.Model):
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
-    dni = models.CharField(max_length=20, unique=True, blank=True, null=True)
     email = models.EmailField(unique=True, blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     fecha_alta = models.DateField(auto_now_add=True)
+    fecha_nacimiento = models.DateField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.nombre} {self.apellido} (DNI: {self.dni})"
+        return f"{self.nombre} {self.apellido}"
+
     
 class Observacion(models.Model):
     socio = models.ForeignKey('Socio', on_delete=models.CASCADE, related_name='observaciones')
