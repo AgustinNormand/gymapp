@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from socios.models import Socio
 from .models import Ejercicio, RegistroEjercicio
+from datetime import date
+from django.contrib import messages
 
 def gestionar_registros(request, socio_id):
     socio = get_object_or_404(Socio, id=socio_id)
@@ -9,18 +11,32 @@ def gestionar_registros(request, socio_id):
 
     if request.method == 'POST':
         ejercicio_id = request.POST.get('ejercicio')
-        fecha = request.POST.get('fecha')
         peso = request.POST.get('peso')
 
-        if ejercicio_id and fecha and peso:
+        if ejercicio_id and peso:
             ejercicio = get_object_or_404(Ejercicio, id=ejercicio_id)
-            RegistroEjercicio.objects.create(
+            hoy = date.today()
+
+            # Verificamos si ya existe un registro para ese socio, ejercicio y día
+            existe = RegistroEjercicio.objects.filter(
                 socio=socio,
                 ejercicio=ejercicio,
-                fecha=fecha,
-                peso=peso
-            )
+                fecha=hoy
+            ).exists()
+
+            if existe:
+                messages.warning(request, f"Ya hay un registro de hoy para el ejercicio {ejercicio.nombre}.")
+            else:
+                RegistroEjercicio.objects.create(
+                    socio=socio,
+                    ejercicio=ejercicio,
+                    fecha=hoy,
+                    peso=peso
+                )
+                messages.success(request, f"Registro agregado correctamente para {ejercicio.nombre}.")
+
             return redirect('ejercicios:gestionar_registros', socio_id=socio.id)
+
 
     return render(request, 'ejercicios/gestionar_registros.html', {
         'socio': socio,
