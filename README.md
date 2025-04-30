@@ -81,4 +81,3 @@ docker-compose run web python manage.py startapp pagos
 [] Permitir que en la asistencia, se vea un pantallazo de 18 personas
 [] En detalle de socio, permitir ver un cuadro, con los ejercicios
 [] En la vista de asistencia, mostrar los que tienen una asistencia confirmada en la hora actual
-[] En gestionar ejercicios, que no te pida la fecha, que directamente lo cargue con fecha de hoy

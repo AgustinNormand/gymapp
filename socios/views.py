@@ -112,7 +112,6 @@ def editar_socio(request, id):
 
 
 def detalle_socio(request, id):
-    # Pagos del socio
     socio = get_object_or_404(Socio, id=id)
     pagos = Pago.objects.filter(socio=socio).order_by('-fecha_pago')
 
@@ -173,7 +172,7 @@ def detalle_socio(request, id):
             registros_ejercicio = RegistroEjercicio.objects.filter(
                 socio=socio,
                 ejercicio=ejercicio_seleccionado
-            ).order_by('fecha')
+            ).order_by('-fecha')
         except Ejercicio.DoesNotExist:
             registros_ejercicio = None
 
