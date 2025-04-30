@@ -22,13 +22,14 @@ def cargar_modalidades_desde_csv(csv_path):
         for row in reader:
             nombre = row.get('NOMBRE', '').strip()
             precio = row.get('PRECIO', '').strip()
+            dias = row.get('DIAS', '').strip()
 
             if not nombre or not precio:
                 continue
 
             modalidad, created = Modalidad.objects.get_or_create(
                 nombre=nombre,
-                defaults={'precio': int(precio)}
+                defaults={'precio': int(precio), 'dias_por_semana': int(dias)}
             )
 
             if created:

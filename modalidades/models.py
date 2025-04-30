@@ -4,9 +4,10 @@ from datetime import date
 class Modalidad(models.Model):
     nombre = models.CharField(max_length=100)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
+    dias_por_semana = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.nombre} (${self.precio})"
+        return f"{self.nombre} (${self.precio}) - {self.dias_por_semana} días/semana"
 
 class HistorialModalidad(models.Model):
     socio = models.ForeignKey('socios.Socio', on_delete=models.CASCADE, related_name='historial_modalidades')

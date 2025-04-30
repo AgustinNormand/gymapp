@@ -1,47 +1,22 @@
-from django.shortcuts import render, redirect
-from django.contrib import messages
+from django.shortcuts import render
 from .models import RegistroEntrada
 from datetime import date
 from django.db.models import Q
-import csv
-from django.http import HttpResponse
 from django.http import JsonResponse
-from socios.models import Socio, Observacion
-from pagos.models import Pago
-from ejercicios.models import RegistroEjercicio
-from .models import RegistroEntrada
+from socios.models import Socio
 from django.utils.timezone import now
-from datetime import timedelta
-from django.views.decorators.csrf import csrf_exempt
-import json
-from django.http import JsonResponse
-from socios.models import Socio
-from registros.models import RegistroEntrada
-from socios.models import Socio
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from socios.models import Socio, Observacion
-from pagos.models import Pago
-from ejercicios.models import RegistroEjercicio
 from .models import RegistroEntrada
-from django.db.models import Q
-from django.utils.timezone import now
-from django.views.decorators.csrf import csrf_exempt
-import json
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from socios.models import Socio, Observacion
-from pagos.models import Pago
-from ejercicios.models import RegistroEjercicio
-from registros.models import RegistroEntrada
-from django.utils.timezone import now
-import json
-
-def vista_registrar_asistencia(request):
-    return render(request, 'registros/registrar_asistencia.html')
-
+from socios.models import Socio
+from django.views.decorators.http import require_POST
+from django.db.models import Prefetch
+from socios.models import Observacion
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
+from ejercicios.models import Ejercicio, RegistroEjercicio
 
 def listar_entradas(request):
     hoy = date.today()
@@ -76,85 +51,69 @@ def listar_entradas(request):
         'socio': socio or '',
     })
 
+def registrar_entrada(request):
+    ahora = now()
+    inicio_hora = ahora.replace(minute=0, second=0, microsecond=0)
+    fin_hora = ahora.replace(minute=59, second=59, microsecond=999999)
+
+    observaciones_activas = Prefetch(
+    'socio__observaciones',
+    queryset=Observacion.objects.filter(
+        Q(fecha_fin__isnull=True) | Q(fecha_fin__gt=ahora.date())
+    ),
+    to_attr='observaciones_activas'
+    )
+
+    observaciones_pasadas = Prefetch(
+        'socio__observaciones',
+        queryset=Observacion.objects.filter(
+            fecha_fin__isnull=False, fecha_fin__lte=ahora.date()
+        ),
+        to_attr='observaciones_pasadas'
+    )
+
+    entradas_hoy = RegistroEntrada.objects.filter(
+        fecha_hora__range=(inicio_hora, fin_hora)
+    ).select_related('socio').prefetch_related(
+        Prefetch('socio', queryset=Socio.objects.prefetch_related(observaciones_activas, observaciones_pasadas))
+    )
+
+
+    ejercicios = Ejercicio.objects.all().order_by('nombre')
+
+    return render(request, 'registros/registrar_entrada.html', {
+        'entradas_hora': entradas_hoy,
+        'ejercicios': ejercicios,
+    })
+
+
 def buscar_socios(request):
-    query = request.GET.get('q', '').strip()
-    if not query:
-        return JsonResponse([], safe=False)
-
+    q = request.GET.get('q', '')
     socios = Socio.objects.filter(
-        Q(nombre__icontains=query) | Q(apellido__icontains=query)
-    ).order_by('apellido')[:10]
-
+        Q(nombre__icontains=q) | Q(apellido__icontains=q)
+    )[:10]
     resultados = [
-        {
-            'id': socio.id,
-            'nombre_completo': f"{socio.apellido} {socio.nombre}",
-        }
+        {'id': socio.id, 'nombre_completo': f'{socio.nombre} {socio.apellido}'}
         for socio in socios
     ]
     return JsonResponse(resultados, safe=False)
 
-@csrf_exempt
-def registrar_asistencia_ajax(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-
-    try:
-        data = json.loads(request.body)
-        socio_id = data.get('id')
-
-        socio = Socio.objects.get(id=socio_id)
-
-        # 🛠️ Crear el registro de asistencia y guardar el ID
-        registro = RegistroEntrada.objects.create(socio=socio)
-
-        # Estado de cuota
-        pagos = Pago.objects.filter(socio=socio).order_by('-fecha_vencimiento')
-        cuota = "Sin pagos" if not pagos else (
-            "Al día" if pagos.first().fecha_vencimiento >= now().date() else "Vencida"
-        )
-
-        # Observaciones activas
-        obs_activas = socio.observaciones.filter(
-            fecha_fin__isnull=True
-        ).values_list('descripcion', flat=True)
-
-        # Pesos cargados
-        ejercicios = RegistroEjercicio.objects.filter(socio=socio).order_by('ejercicio__nombre')
-        pesos = {
-            reg.ejercicio.nombre: float(reg.peso)
-            for reg in ejercicios
-        }
-
-        return JsonResponse({
-            'socio': f"{socio.apellido} {socio.nombre}",
-            'cuota': cuota,
-            'observaciones': list(obs_activas),
-            'pesos': pesos,
-            'registro_id': registro.id  # 👈🔥 ACÁ DEVOLVEMOS EL ID DEL REGISTRO
-        })
-
-    except Socio.DoesNotExist:
-        return JsonResponse({'error': 'Socio no encontrado'}, status=404)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
-
-
-@csrf_exempt  # (Idealmente, después mejoramos seguridad con CSRF Token también)
 @require_POST
-def borrar_asistencia_ajax(request):
-    try:
-        data = json.loads(request.body)
-        registro_id = data.get('registro_id')
+def confirmar_entrada(request):
+    socio_id = request.POST.get('socio_id')
+    if socio_id:
+        socio = Socio.objects.filter(id=socio_id).first()
+        if socio:
+            RegistroEntrada.objects.create(socio=socio)
+            messages.success(request, f'Entrada registrada para {socio.nombre} {socio.apellido}.')
+        else:
+            messages.error(request, 'Socio no encontrado.')
+    else:
+        messages.error(request, 'No se proporcionó un ID de socio.')
+    return redirect('registrar_entrada')
 
-        registro = RegistroEntrada.objects.get(id=registro_id)
-        registro.delete()
-
-        return JsonResponse({'status': 'ok'})
-    except RegistroEntrada.DoesNotExist:
-        return JsonResponse({'error': 'Asistencia no encontrada'}, status=404)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
-
-
-
+def eliminar_entrada(request, id):
+    entrada = get_object_or_404(RegistroEntrada, id=id)
+    entrada.delete()
+    messages.success(request, f"Asistencia de {entrada.socio} eliminada correctamente.")
+    return redirect('registrar_entrada')

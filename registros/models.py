@@ -1,5 +1,5 @@
 from django.db import models
-from socios.models import Socio  # Asegurate de importar Socio si está en otra app
+from socios.models import Socio
 
 class RegistroEntrada(models.Model):
     socio = models.ForeignKey(Socio, on_delete=models.CASCADE)

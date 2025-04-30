@@ -28,7 +28,6 @@
 [] Add .env.example file and add to .gitignore .env file
 
 ### Functional
-[] Mejorar el registro de asistencias, para que sea más rápido cargar, poder ver las observaciones y los pesos de los presentes. (Implementar una vista con toda esta info)
 [] Ver de crear distintos usuarios, con roles diferentes, para los distintos profes
 [] Mostrar una alerta cuando se carga una asistencia, de alguien que no pagó
 [] Mostrar una alerta cuando se carga una asistencia, que ya vino más de lo que podía, por semana
@@ -42,7 +41,6 @@
 [] Agregar info de, usuarios pagos, presentes
 [] Agregar info de, usuarios no pagos, presentes
 [] Agregar gráficos de cantidad de usuarios mensuales
-[] Agregar gráficos de cantidad de asistencias por hora
 
 ### Next steps - Going to the moon
 [] Agregar cantidad de ingresos estimados
@@ -74,10 +72,3 @@ docker-compose up --build
 
 ### Build a new app
 docker-compose run web python manage.py startapp pagos
-
-
-
-
-[] Permitir que en la asistencia, se vea un pantallazo de 18 personas
-[] En detalle de socio, permitir ver un cuadro, con los ejercicios
-[] En la vista de asistencia, mostrar los que tienen una asistencia confirmada en la hora actual
