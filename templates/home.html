@@ -3,8 +3,17 @@
 {% block title %}Inicio - CINAF{% endblock %}
 
 {% block content %}
+
+{% load static %}
+
+<div class="text-center my-4">
+    <img src="{% static 'img/cinaf_logo.png' %}" alt="Logo CINAF" style="max-height: 200px;">
+</div>
+
+
+
 <div class="container">
-    <h1 class="mb-4">Dashboard</h1>
+
     <div class="row">
         <div class="col-md-6"> 
             <div class="card text-white bg-success mb-3 shadow">
@@ -24,13 +33,12 @@
             </div>
         </div>
     </div>
-</div>
-
 
     <!-- Gráfico de Asistencias por Hora -->
     <h2 class="mt-5">Asistencias por Hora</h2>
 
     <form method="get" class="row g-3 align-items-center mb-4">
+        <input type="hidden" name="grupo" value="{{ grupo }}">
         <div class="col-auto">
             <label for="filtro" class="col-form-label">Ver asistencias de:</label>
         </div>
@@ -85,5 +93,77 @@
     });
     </script>
 
+    <h2 class="mt-5">Actividad Mensual de Socios</h2>
+    <div class="row">
+        <div class="col-md-6 col-lg-3">
+            <a href="?grupo=no_pago_sin_asistencia{% if filtro %}&filtro={{ filtro }}{% endif %}" class="text-decoration-none">
+                <div class="card bg-danger text-white mb-3 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">No pago, sin asistencias</h5>
+                        <p class="card-text fs-3">{{ socios_no_pago_sin_asistencia }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="?grupo=no_pago_con_asistencia{% if filtro %}&filtro={{ filtro }}{% endif %}" class="text-decoration-none">
+                <div class="card bg-warning text-dark mb-3 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">No pago, con asistencias</h5>
+                        <p class="card-text fs-3">{{ socios_no_pago_con_asistencia }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="?grupo=pago_sin_asistencia{% if filtro %}&filtro={{ filtro }}{% endif %}" class="text-decoration-none">
+                <div class="card bg-secondary text-white mb-3 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">Pago, sin asistencias</h5>
+                        <p class="card-text fs-3">{{ socios_con_pago_sin_asistencia }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="?grupo=pago_con_asistencia{% if filtro %}&filtro={{ filtro }}{% endif %}" class="text-decoration-none">
+                <div class="card bg-primary text-white mb-3 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">Pago, con asistencias</h5>
+                        <p class="card-text fs-3">{{ socios_con_pago_con_asistencia }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    {% if grupo %}
+    <div class="card mt-4 shadow">
+        <div class="card-body">
+            <h4 class="card-title">{{ titulo_detalle }}</h4>
+            <div class="table-responsive mt-3">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for socio in socios_detalle %}
+                        <tr>
+                            <td>{{ socio.nombre }} {{ socio.apellido }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5">No hay socios en este grupo.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <a href="{% url 'home' %}?{% if filtro %}filtro={{ filtro }}{% endif %}" class="btn btn-outline-secondary mt-3">Ocultar detalle</a>
+        </div>
+    </div>
+    {% endif %}
+
+    
 </div>
 {% endblock %}
