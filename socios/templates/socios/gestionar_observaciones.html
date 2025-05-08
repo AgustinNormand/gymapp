@@ -6,7 +6,7 @@
 <div class="container">
     <h2>Observaciones de {{ socio.nombre }} {{ socio.apellido }}</h2>
 
-    <a href="{% url 'socios:crear_observacion' socio.id %}" class="btn btn-primary mb-3">Crear Nueva Observación</a>
+    <a href="{% url 'socios:alta_observacion' socio.id %}" class="btn btn-primary mb-3">Crear Nueva Observación</a>
 
     {% if observaciones %}
         <ul class="list-group">
@@ -18,7 +18,7 @@
                     </div>
                     <div>
                         <a href="{% url 'socios:editar_observacion' observacion.id %}" class="btn btn-sm btn-warning">Editar</a>
-                        <a href="{% url 'socios:borrar_observacion' observacion.id %}" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que querés borrar esta observación?');">Borrar</a>
+                        <a href="{% url 'socios:eliminar_observacion' observacion.id %}" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que querés borrar esta observación?');">Borrar</a>
                     </div>
                 </li>
             {% endfor %}

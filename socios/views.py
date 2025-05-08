@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect, get_object_or_404
-
 from registros.models import RegistroEntrada
 from .forms import SocioForm, SocioEditForm, ObservacionForm
 from .models import Socio, Observacion
@@ -15,13 +14,19 @@ from django.db.models import Q
 from django.http import JsonResponse
 
 
+############ ABM de Socios ############
 def alta_socio(request):
+    # Este método se encarga de crear un nuevo socio.
+    # Si el método es GET, se muestra el formulario vacío.
+    # Si el método es POST, significa que se está enviando el formulario, por ende, se procesa.
+    # Si el formulario es válido, se guarda el nuevo socio y se redirige a la lista de socios.
+    # Si el formulario no es válido, se muestra un mensaje de error.
+
     if request.method == 'POST':
         form = SocioForm(request.POST)
         if form.is_valid():
             socio = form.save()
 
-            # Nueva parte: guardar el historial de modalidad
             modalidad = form.cleaned_data['modalidad']
             hoy = timezone.now().date()
 
@@ -36,82 +41,124 @@ def alta_socio(request):
             return redirect('socios:listar_socios')
         else:
             messages.error(request, 'Error al crear el socio. Por favor revisá el formulario.')
+            return render(request, 'socios/alta_socio.html', {'form': form})
     else:
         form = SocioForm()
-    return render(request, 'socios/alta_socio.html', {'form': form})
-
-
-def listar_socios(request):
-    query = request.GET.get('q') or ''
-
-    socios = Socio.objects.all()
-
-    if query:
-        socios = socios.filter(
-            Q(nombre__icontains=query) | Q(apellido__icontains=query)
-        )
-
-    socios_info = []
-    hoy = date.today()
-
-    for socio in socios:
-        pagos = Pago.objects.filter(socio=socio).order_by('-fecha_vencimiento')
-
-        estado_cuota = 'Sin pagos'
-        color_cuota = 'secondary'
-
-        if pagos.exists():
-            ultimo_pago = pagos.first()
-            fecha_vencimiento = ultimo_pago.fecha_vencimiento
-
-            if fecha_vencimiento >= hoy + timedelta(days=5):
-                estado_cuota = 'Al día'
-                color_cuota = 'success'
-            elif hoy <= fecha_vencimiento < hoy + timedelta(days=5):
-                estado_cuota = 'Por vencer'
-                color_cuota = 'warning'
-            else:
-                estado_cuota = 'Vencido'
-                color_cuota = 'danger'
-
-        socios_info.append({
-            'socio': socio,
-            'estado_cuota': estado_cuota,
-            'color_cuota': color_cuota,
-        })
-
-    return render(request, 'socios/listar_socios.html', {
-        'socios_info': socios_info,
-        'query': query,  # 👈 Le pasamos el query al template también
-    })
-
-
+        return render(request, 'socios/alta_socio.html', {'form': form})
 
 def eliminar_socio(request, id):
+    # Este método se encarga de eliminar un socio.
+    # Se busca el socio por su ID y se elimina.
+    # Si el socio no existe, se lanza un error 404.
+    # Luego se redirige a la lista de socios y se muestra un mensaje de éxito.
+
     socio = get_object_or_404(Socio, id=id)
     socio.delete()
+
     messages.success(request, 'Socio eliminado exitosamente.')
     return redirect('socios:listar_socios')
 
-
 def editar_socio(request, id):
+    # Este método se encarga de editar un socio existente.
+    # Se busca el socio por su ID y se carga el formulario con los datos actuales.
+    # Si no se encuentra el socio, se lanza un error 404.
+    # Si el método es POST, se procesa el formulario.
+    # Si el formulario es válido, se guarda el socio y se redirige a la lista de socios.
+    # Si el formulario no es válido, se muestra un mensaje de error.
+
     socio = get_object_or_404(Socio, id=id)
+
     if request.method == 'POST':
-        form = SocioEditForm(request.POST, instance=socio)  # 🛠️ Usamos SocioEditForm
+        form = SocioEditForm(request.POST, instance=socio)
         if form.is_valid():
             form.save()
             messages.success(request, 'Socio actualizado exitosamente.')
             return redirect('socios:listar_socios')
         else:
             messages.error(request, 'Hubo un error al actualizar el socio. Por favor revisá el formulario.')
+            form = SocioEditForm(instance=socio)
+            return render(request, 'socios/editar_socio.html', {'form': form})
     else:
-        form = SocioEditForm(instance=socio)  # 🛠️ Usamos SocioEditForm
+        form = SocioEditForm(instance=socio)
+        return render(request, 'socios/editar_socio.html', {'form': form})
+    
+############ ABM de Observaciones ############
 
-    return render(request, 'socios/editar_socio.html', {'form': form})
+def alta_observacion(request, socio_id):
+    # Este método se encarga de crear una nueva observación para un socio.
+    # Se busca el socio por su ID y se carga el formulario vacío.
+    # Si el método es POST, se procesa el formulario.
+    # Si el formulario es válido, se guarda la observación y se redirige a la lista de observaciones del socio.
+    # Si el formulario no es válido, se muestra un mensaje de error.
+    # Si el socio no existe, se lanza un error 404.
+    # Si el método no es POST, se muestra el formulario vacío.
+
+    socio = get_object_or_404(Socio, id=socio_id)
+
+    if request.method == 'POST':
+        form = ObservacionForm(request.POST)
+        if form.is_valid():
+            observacion = form.save(commit=False)
+            observacion.socio = socio
+            observacion.save()
+            return redirect('socios:gestionar_observaciones', socio_id=socio.id)
+        else:
+            messages.error(request, 'Error al crear la observación. Por favor revisá el formulario.')
+            form = ObservacionForm()
+            return render(request, 'socios/crear_editar_observacion.html', {'form': form, 'socio': socio, 'es_edicion': False})
+
+    else:
+        form = ObservacionForm()
+        return render(request, 'socios/crear_editar_observacion.html', {'form': form, 'socio': socio, 'es_edicion': False})
+
+def eliminar_observacion(request, observacion_id):
+    # Este método se encarga de eliminar una observación.
+    # Se busca la observación por su ID y se elimina.
+    # Si la observación no existe, se lanza un error 404.
+    # Luego se redirige a la lista de observaciones del socio y se muestra un mensaje de éxito.
 
 
+    observacion = get_object_or_404(Observacion, id=observacion_id)
+    socio_id = observacion.socio.id
+
+    observacion.delete()
+    return redirect('socios:gestionar_observaciones', socio_id=socio_id)
+
+def editar_observacion(request, observacion_id):
+    # Este método se encarga de editar una observación existente.
+    # Se busca la observación por su ID y se carga el formulario con los datos actuales.
+    # Si no se encuentra la observación, se lanza un error 404.
+    # Si el método es POST, se procesa el formulario.
+    # Si el formulario es válido, se guarda la observación y se redirige a la lista de observaciones del socio.
+    # Si el formulario no es válido, se muestra un mensaje de error.
+    # Si el método no es POST, se muestra el formulario con los datos actuales.
+
+
+    observacion = get_object_or_404(Observacion, id=observacion_id)
+    socio = observacion.socio
+
+    if request.method == 'POST':
+        form = ObservacionForm(request.POST, instance=observacion)
+        if form.is_valid():
+            form.save()
+            return redirect('socios:gestionar_observaciones', socio_id=socio.id)
+        else:
+            messages.error(request, 'Error al editar la observación. Por favor revisá el formulario.')
+            form = ObservacionForm(instance=observacion)
+            return render(request, 'socios/crear_editar_observacion.html', {'form': form, 'socio': socio, 'es_edicion': True})
+    else:
+        form = ObservacionForm(instance=observacion)
+        return render(request, 'socios/crear_editar_observacion.html', {'form': form, 'socio': socio, 'es_edicion': True})
+
+
+############ Otros métodos ############
 
 def detalle_socio(request, id):
+    # Este método se encarga de mostrar el detalle de un socio.
+    # Se busca el socio por su ID y se carga la información de pagos, modalidad, observaciones y ejercicios.
+    # Si el socio no existe, se lanza un error 404.
+    # TODO: Me parece que podríamos reducir la carga lógica de este méoodo, delegandola en los modelos
+
     socio = get_object_or_404(Socio, id=id)
     pagos = Pago.objects.filter(socio=socio).order_by('-fecha_pago')
 
@@ -213,6 +260,67 @@ def detalle_socio(request, id):
         'asistencias': asistencias,
     })
 
+def buscar_socios(request):
+    q = request.GET.get('q', '')
+    socios = Socio.objects.filter(
+        Q(nombre__icontains=q) | Q(apellido__icontains=q)
+    )[:10]
+    resultados = [
+        {'id': socio.id, 'nombre_completo': f'{socio.nombre} {socio.apellido}'}
+        for socio in socios
+    ]
+    return JsonResponse(resultados, safe=False)
+
+
+
+def listar_socios(request):
+    query = request.GET.get('q') or ''
+
+    socios = Socio.objects.all()
+
+    if query:
+        socios = socios.filter(
+            Q(nombre__icontains=query) | Q(apellido__icontains=query)
+        )
+
+    socios_info = []
+    hoy = date.today()
+
+    for socio in socios:
+        pagos = Pago.objects.filter(socio=socio).order_by('-fecha_vencimiento')
+
+        estado_cuota = 'Sin pagos'
+        color_cuota = 'secondary'
+
+        if pagos.exists():
+            ultimo_pago = pagos.first()
+            fecha_vencimiento = ultimo_pago.fecha_vencimiento
+
+            if fecha_vencimiento >= hoy + timedelta(days=5):
+                estado_cuota = 'Al día'
+                color_cuota = 'success'
+            elif hoy <= fecha_vencimiento < hoy + timedelta(days=5):
+                estado_cuota = 'Por vencer'
+                color_cuota = 'warning'
+            else:
+                estado_cuota = 'Vencido'
+                color_cuota = 'danger'
+
+        socios_info.append({
+            'socio': socio,
+            'estado_cuota': estado_cuota,
+            'color_cuota': color_cuota,
+        })
+
+    return render(request, 'socios/listar_socios.html', {
+        'socios_info': socios_info,
+        'query': query,  # 👈 Le pasamos el query al template también
+    })
+
+
+
+
+
 
 
 def cambiar_modalidad(request, socio_id):
@@ -247,6 +355,10 @@ def cambiar_modalidad(request, socio_id):
 
 
 def gestionar_observaciones(request, socio_id):
+    # Este método se encarga de gestionar las observaciones de un socio.
+    # Se busca el socio por su ID y se carga la lista de observaciones.
+    # Si el socio no existe, se lanza un error 404.
+    
     socio = get_object_or_404(Socio, id=socio_id)
     observaciones = socio.observaciones.all()
 
@@ -255,40 +367,41 @@ def gestionar_observaciones(request, socio_id):
         'observaciones': observaciones,
     })
 
-def crear_observacion(request, socio_id):
-    socio = get_object_or_404(Socio, id=socio_id)
-
-    if request.method == 'POST':
-        form = ObservacionForm(request.POST)
-        if form.is_valid():
-            observacion = form.save(commit=False)
-            observacion.socio = socio
-            observacion.save()
-            return redirect('socios:gestionar_observaciones', socio_id=socio.id)
-    else:
-        form = ObservacionForm()
-
-    return render(request, 'socios/crear_editar_observacion.html', {'form': form, 'socio': socio, 'es_edicion': False})
 
 
-def editar_observacion(request, observacion_id):
-    observacion = get_object_or_404(Observacion, id=observacion_id)
-    socio = observacion.socio
+def tabla_socios_parcial(request):
+    query = request.GET.get('q', '')
+    socios = Socio.objects.all()
 
-    if request.method == 'POST':
-        form = ObservacionForm(request.POST, instance=observacion)
-        if form.is_valid():
-            form.save()
-            return redirect('socios:gestionar_observaciones', socio_id=socio.id)
-    else:
-        form = ObservacionForm(instance=observacion)
+    if query:
+        socios = socios.filter(Q(nombre__icontains=query) | Q(apellido__icontains=query))
 
-    return render(request, 'socios/crear_editar_observacion.html', {'form': form, 'socio': socio, 'es_edicion': True})
+    socios_info = []
+    hoy = date.today()
 
+    for socio in socios:
+        pagos = Pago.objects.filter(socio=socio).order_by('-fecha_vencimiento')
+        estado_cuota = 'Sin pagos'
+        color_cuota = 'secondary'
 
-def borrar_observacion(request, observacion_id):
-    observacion = get_object_or_404(Observacion, id=observacion_id)
-    socio_id = observacion.socio.id
-    observacion.delete()
-    return redirect('socios:gestionar_observaciones', socio_id=socio_id)
+        if pagos.exists():
+            ultimo_pago = pagos.first()
+            fecha_vencimiento = ultimo_pago.fecha_vencimiento
 
+            if fecha_vencimiento >= hoy + timedelta(days=5):
+                estado_cuota = 'Al día'
+                color_cuota = 'success'
+            elif hoy <= fecha_vencimiento < hoy + timedelta(days=5):
+                estado_cuota = 'Por vencer'
+                color_cuota = 'warning'
+            else:
+                estado_cuota = 'Vencido'
+                color_cuota = 'danger'
+
+        socios_info.append({
+            'socio': socio,
+            'estado_cuota': estado_cuota,
+            'color_cuota': color_cuota,
+        })
+
+    return render(request, 'socios/tabla_socios.html', {'socios_info': socios_info})

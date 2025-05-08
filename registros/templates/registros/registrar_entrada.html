@@ -4,7 +4,7 @@
 {% block content %}
 <h2>Registrar Asistencia</h2>
 
-<form method="POST" action="{% url 'confirmar_entrada' %}" id="formEntrada">
+<form method="POST" action="{% url 'alta_entrada' %}" id="formEntrada">
     {% csrf_token %}
     <div class="mb-3">
         <label for="busquedaSocio" class="form-label">Buscar socio</label>
@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        fetch("{% url 'buscar_socios' %}?q=" + encodeURIComponent(q))
+        fetch("{% url 'socios:buscar_socios' %}?q=" + encodeURIComponent(q))
             .then(res => res.json())
             .then(data => {
                 resultados.innerHTML = "";

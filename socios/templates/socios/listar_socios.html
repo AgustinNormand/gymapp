@@ -5,61 +5,27 @@
 {% block content %}
 <div class="container mt-5">
     <h2>Lista de Socios</h2>
-    <form method="get" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar socio por nombre o apellido...">
-            <button type="submit" class="btn btn-primary">Buscar</button>
-        </div>
-    </form>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Email</th>
-                <th>Teléfono</th>
-                <th>Estado de Cuota</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in socios_info %}
-                <tr>
-                    <td>{{ item.socio.id }}</td>
-                    <td>{{ item.socio.nombre }}</td>
-                    <td>{{ item.socio.apellido }}</td>
-                    <td>{{ item.socio.email }}</td>
-                    <td>{{ item.socio.telefono }}</td>
-                    <td>
-                        <span class="badge bg-{{ item.color_cuota }}">
-                            {{ item.estado_cuota }}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                Acciones
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'socios:detalle_socio' item.socio.id %}">Ver Detalle</a></li>
-                                <li><a class="dropdown-item" href="{% url 'socios:editar_socio' item.socio.id %}">Editar</a></li>
-                                <li><a class="dropdown-item" href="{% url 'pagos:registrar_pago' %}?socio_id={{ item.socio.id }}">Registrar Pago</a></li>
-                                <li><a class="dropdown-item" href="{% url 'socios:cambiar_modalidad' item.socio.id %}">Cambiar Modalidad</a></li>
-                                <li><a class="dropdown-item" href="{% url 'socios:gestionar_observaciones' item.socio.id %}">Gestionar Observaciones</a></li>
-                                <li><a class="dropdown-item" href="{% url 'ejercicios:gestionar_registros' item.socio.id %}">Gestionar Ejercicios</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="{% url 'socios:eliminar_socio' item.socio.id %}" onclick="return confirm('¿Seguro que querés borrar este socio?');">Eliminar</a></li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="7">No hay socios cargados aún.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <input type="text" id="busqueda-socio" class="form-control" placeholder="Buscar socio por nombre o apellido...">
+    <div id="tabla-socios">
+        {% include 'socios/tabla_socios.html' %}
+    </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputBusqueda = document.getElementById('busqueda-socio');
+        const tabla = document.getElementById('tabla-socios');
+    
+        inputBusqueda.addEventListener('input', function () {
+            const query = inputBusqueda.value;
+    
+            fetch(`/socios/ajax/tabla_socios/?q=${encodeURIComponent(query)}`)
+                .then(response => response.text())
+                .then(html => {
+                    tabla.innerHTML = html;
+                })
+                .catch(err => console.error("Error al actualizar tabla de socios:", err));
+        });
+    });
+    </script>
+    
 {% endblock %}
