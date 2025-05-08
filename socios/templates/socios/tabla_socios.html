@@ -1,15 +1,15 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Email</th>
-            <th>Teléfono</th>
-            <th>Estado de Cuota</th>
-            <th>Acciones</th>
+          <th class="sortable asc" data-col="0">ID <span class="sort-icon">▲</span></th>
+          <th class="sortable" data-col="1">Nombre <span class="sort-icon">⇅</span></th>
+          <th class="sortable" data-col="2">Apellido <span class="sort-icon">⇅</span></th>
+          <th class="sortable" data-col="3">Email <span class="sort-icon">⇅</span></th>
+          <th class="sortable" data-col="4">Teléfono <span class="sort-icon">⇅</span></th>
+          <th class="sortable" data-col="5">Estado de Cuota <span class="sort-icon">⇅</span></th>
+          <th>Acciones</th>
         </tr>
-    </thead>
+      </thead>
     <tbody>
         {% for item in socios_info %}
             <tr>
