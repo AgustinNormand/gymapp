@@ -5,7 +5,7 @@ from .models import Socio, Observacion
 from django.contrib import messages
 from pagos.models import Pago
 from datetime import date, timedelta
-from modalidades.models import Modalidad, HistorialModalidad
+from modalidades.models import HistorialModalidad
 from django.utils import timezone
 from django.db.models import BooleanField, Case, When, Value
 from django.db import models
@@ -316,42 +316,6 @@ def listar_socios(request):
         'socios_info': socios_info,
         'query': query,  # 👈 Le pasamos el query al template también
     })
-
-
-
-
-
-
-
-def cambiar_modalidad(request, socio_id):
-    socio = get_object_or_404(Socio, id=socio_id)
-    modalidades = Modalidad.objects.all()
-
-    if request.method == 'POST':
-        nueva_modalidad_id = request.POST.get('modalidad')
-        nueva_modalidad = Modalidad.objects.get(id=nueva_modalidad_id)
-
-        hoy = timezone.now().date()
-
-        # Cerrar historial anterior
-        historial_actual = HistorialModalidad.objects.filter(socio=socio, fecha_fin__isnull=True).first()
-        if historial_actual:
-            historial_actual.fecha_fin = hoy
-            historial_actual.save()
-
-        # Crear nuevo historial
-        HistorialModalidad.objects.create(
-            socio=socio,
-            modalidad=nueva_modalidad,
-            precio_en_el_momento=nueva_modalidad.precio,
-            fecha_inicio=hoy,
-            fecha_fin=None
-        )
-
-
-        return redirect('socios:listar_socios')  # Volvemos a la lista de socios
-
-    return render(request, 'socios/cambiar_modalidad.html', {'socio': socio, 'modalidades': modalidades})
 
 
 def gestionar_observaciones(request, socio_id):

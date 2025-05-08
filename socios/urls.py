@@ -24,7 +24,5 @@ urlpatterns = [
     # URLs para la gestión de observaciones
     path('socio/<int:socio_id>/observaciones/', views.gestionar_observaciones, name='gestionar_observaciones'),
 
-    # Otras URLs
-    path('cambiar-modalidad/<int:socio_id>/', views.cambiar_modalidad, name='cambiar_modalidad'),
     
 ]
