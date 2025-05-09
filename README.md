@@ -61,33 +61,18 @@ docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -
 
 ### Functional
 [] Ver de crear distintos usuarios, con roles diferentes, para los distintos profes
-[] Mostrar una alerta cuando se carga una asistencia, de alguien que no pagó
-[] Mostrar una alerta cuando se carga una asistencia, que ya vino más de lo que podía, por semana
-
-### Visual
-[] Agregar logo de Cinaf
 
 ### Dash
-[] Agregar info de, usuarios no pagos, ausentes
-[] Agregar info de, usuarios pagos, ausentes
-[] Agregar info de, usuarios pagos, presentes
-[] Agregar info de, usuarios no pagos, presentes
 [] Agregar gráficos de cantidad de usuarios mensuales
+
+### Other
+[] Script que periodicamente pullea el repo en la rama main, y si hay cambios, hace un "docker-compose up"
+[] Script que hace un backup de la base de datos
+[] Deploy de la solución en GCP, en la capa Free Tier
+[] Si el socio no tiene modalidad asignada, que me permita asignarle una, y luego registrar el pago, de forma más simple
+[] Agregar un tooltip a las acciones, para que quede claro que hace cada una
 
 ### Next steps - Going to the moon
 [] Agregar cantidad de ingresos estimados
 [] Mandarle un whatsapp a un socio, cuando dejó de venir
 [] Cargar foto de cada socio, para usar en reconocimiento facial
-
-
-
-
-
-
-[] Script que periodicamente pullea el repo en la rama main, y si hay cambios, hace un "docker-compose up"
-[] Script que hace un backup de la base de datos
-[] Deploy de la solución en GCP, en la capa Free Tier
-[] En la vista de socios, a medida voy escribiendo, ir mostrando los resultados
-[] Si el socio no tiene modalidad asignada, que me permita asignarle una, y luego registrar el pago, de forma más simple
-[] Unificar los íconos de acciones que se pueden hacer sobre socios, a lo largo de la app, para estandarizar. Y disponibilizar estas acciones, en todas las vistas donde se muestra información de socios, incluso, en la vista de detalle de un socio
-

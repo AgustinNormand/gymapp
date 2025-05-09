@@ -26,26 +26,15 @@ def alta_pago(request):
 
     socio_id = request.GET.get('socio_id')
     socio = get_object_or_404(Socio, id=socio_id)
-    socio = None
-    modalidad_actual = None
-    monto_sugerido = 20000  # Default por si no hay modalidad
 
-    if socio_id:
-        socio = Socio.objects.get(id=socio_id)
-        modalidad_actual = HistorialModalidad.objects.filter(
-            socio=socio, fecha_fin__isnull=True
-        ).order_by('-fecha_inicio').first()
 
-        if modalidad_actual:
-            monto_sugerido = modalidad_actual.precio_en_el_momento
-        else:
-            # 🚨 No tiene modalidad activa
-            messages.error(request, "El socio no tiene una modalidad activa asignada. No se puede registrar el pago.")
-            return redirect('socios:listar_socios') 
+    modalidad_actual = socio.modalidad_actual()
+
+    if modalidad_actual:
+        monto_sugerido = modalidad_actual.precio_en_el_momento
     else:
-        # 🚨 No se envió el ID de socio
-        messages.error(request, "No se ha proporcionado un ID de socio válido.")
-        return redirect('socios:listar_socios') 
+        messages.warning(request, "El socio no tiene una modalidad activa asignada. Asigne una modalidad, antes de registrar el pago.")
+        return redirect('modalidades:cambiar_modalidad', socio_id=socio.id)
 
     hoy = date.today()
     ultimo_dia_mes = date(hoy.year, hoy.month, monthrange(hoy.year, hoy.month)[1])
@@ -59,7 +48,6 @@ def alta_pago(request):
             pago.save()
 
             messages.success(request, f"Pago registrado correctamente para {socio.nombre} {socio.apellido}.")
-
             return redirect('pagos:listar_pagos')
     else:
         initial_data = {

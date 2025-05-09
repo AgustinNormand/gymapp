@@ -24,9 +24,13 @@ def cambiar_modalidad(request, socio_id):
         nueva_modalidad_id = request.POST.get('modalidad')
         nueva_modalidad = Modalidad.objects.get(id=nueva_modalidad_id)
 
+        if socio.modalidad_actual() is None:
+            modalidad_actual = None
+        else:
+            modalidad_actual = socio.modalidad_actual().modalidad
+
         # Si la modalidad es la misma, retornamos un mensaje de error, usando la app de mensajes de Django
-        if socio.modalidad_actual().modalidad == nueva_modalidad:
-            
+        if modalidad_actual == nueva_modalidad:
             messages.error(request, "La modalidad seleccionada es la misma que la actual.")
 
             # Redirijo al usuario al formulario de cambio de modalidad
@@ -52,6 +56,6 @@ def cambiar_modalidad(request, socio_id):
 
             # Mensaje de éxito
             messages.success(request, f"Modalidad cambiada a {nueva_modalidad.nombre} para el socio {socio.nombre} {socio.apellido}.")
-            return redirect('socios:listar_socios')  # Volvemos a la lista de socios
+            return redirect('socios:listar_socios')
 
     return render(request, 'modalidades/cambiar_modalidad.html', {'socio': socio, 'modalidades': modalidades})

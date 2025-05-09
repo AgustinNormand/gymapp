@@ -143,6 +143,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("formEntrada");
     let seleccionIndex = -1;
 
+    input.focus();  
+
     function seleccionarSocio(socio) {
         input.value = socio.nombre_completo;
         inputHidden.value = socio.id;

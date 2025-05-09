@@ -9,11 +9,10 @@
             <h5 class="card-title">Datos del Socio</h5>
             <p><strong>Socio:</strong> {{ socio.nombre }} {{ socio.apellido }}</p>
             <p><strong>Modalidad actual:</strong> 
-                {% if modalidad_actual %}
-                  {{ modalidad_actual.modalidad.nombre }}
-                {% else %}
-                  Sin modalidad asignada
-                {% endif %}
+              {{ modalidad_actual.modalidad.nombre }}
+              <a href="{% url 'modalidades:cambiar_modalidad' socio.id %}" class="ms-1 text-decoration-none" title="Cambiar modalidad">
+                <i class="bi bi-person-badge text-primary"></i>
+              </a>
             </p>
             <p><strong>Monto sugerido:</strong> ${{ monto_sugerido }}</p>
         </div>
