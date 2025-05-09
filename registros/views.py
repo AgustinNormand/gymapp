@@ -44,7 +44,8 @@ def eliminar_entrada(request, id):
     entrada.delete()
 
     messages.success(request, f"Asistencia de {entrada.socio} eliminada correctamente.")
-    return redirect('registrar_entrada')
+    #return redirect('registrar_entrada')
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
 # No se permiten modificaciones a las entradas ya registradas, por fuera del admin
 
