@@ -55,11 +55,12 @@ class Socio(models.Model):
             return 'al_dia'
         
     def modalidad_actual(self):
-        hoy = now().date()
+        # Obtiene la modalidad actual del socio
+        
         return self.historial_modalidades.filter(
-            models.Q(fecha_fin__isnull=True) | models.Q(fecha_fin__gte=hoy),
-            fecha_inicio__lte=hoy
+            fecha_fin__isnull=True
         ).order_by('-fecha_inicio').first()
+
 
     def cantidad_asistencias_semana_actual(self):
         inicio_semana = now().date() - timedelta(days=now().weekday())

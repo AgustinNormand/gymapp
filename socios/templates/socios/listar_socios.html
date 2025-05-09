@@ -5,61 +5,108 @@
 {% block content %}
 <div class="container mt-5">
     <h2>Lista de Socios</h2>
-    <form method="get" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar socio por nombre o apellido...">
-            <button type="submit" class="btn btn-primary">Buscar</button>
-        </div>
-    </form>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Email</th>
-                <th>Teléfono</th>
-                <th>Estado de Cuota</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in socios_info %}
-                <tr>
-                    <td>{{ item.socio.id }}</td>
-                    <td>{{ item.socio.nombre }}</td>
-                    <td>{{ item.socio.apellido }}</td>
-                    <td>{{ item.socio.email }}</td>
-                    <td>{{ item.socio.telefono }}</td>
-                    <td>
-                        <span class="badge bg-{{ item.color_cuota }}">
-                            {{ item.estado_cuota }}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                Acciones
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'socios:detalle_socio' item.socio.id %}">Ver Detalle</a></li>
-                                <li><a class="dropdown-item" href="{% url 'socios:editar_socio' item.socio.id %}">Editar</a></li>
-                                <li><a class="dropdown-item" href="{% url 'pagos:registrar_pago' %}?socio_id={{ item.socio.id }}">Registrar Pago</a></li>
-                                <li><a class="dropdown-item" href="{% url 'socios:cambiar_modalidad' item.socio.id %}">Cambiar Modalidad</a></li>
-                                <li><a class="dropdown-item" href="{% url 'socios:gestionar_observaciones' item.socio.id %}">Gestionar Observaciones</a></li>
-                                <li><a class="dropdown-item" href="{% url 'ejercicios:gestionar_registros' item.socio.id %}">Gestionar Ejercicios</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="{% url 'socios:eliminar_socio' item.socio.id %}" onclick="return confirm('¿Seguro que querés borrar este socio?');">Eliminar</a></li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="7">No hay socios cargados aún.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <input type="text" id="busqueda-socio" class="form-control" placeholder="Buscar socio por nombre o apellido...">
+    <div id="tabla-socios">
+        {% include 'socios/tabla_socios.html' %}
+    </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputBusqueda = document.getElementById('busqueda-socio');
+        const tabla = document.getElementById('tabla-socios');
+    
+        inputBusqueda.addEventListener('input', function () {
+            const query = inputBusqueda.value;
+    
+            fetch(`/socios/ajax/tabla_socios/?q=${encodeURIComponent(query)}`)
+                .then(response => response.text())
+                .then(html => {
+                    tabla.innerHTML = html;
+                })
+                .catch(err => console.error("Error al actualizar tabla de socios:", err));
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function activarOrdenamiento() {
+            const tabla = document.querySelector('table');
+            const headers = tabla.querySelectorAll('th.sortable');
+    
+            function ordenarTablaPorColumna(colIndex, asc = true) {
+                const tbody = tabla.querySelector('tbody');
+                const filas = Array.from(tbody.querySelectorAll('tr'));
+    
+                const filasOrdenadas = filas.sort((a, b) => {
+                    const aText = a.children[colIndex].textContent.trim();
+                    const bText = b.children[colIndex].textContent.trim();
+    
+                    const aNum = parseFloat(aText);
+                    const bNum = parseFloat(bText);
+                    const ambosNumeros = !isNaN(aNum) && !isNaN(bNum);
+    
+                    if (ambosNumeros) {
+                        return asc ? aNum - bNum : bNum - aNum;
+                    } else {
+                        return asc
+                            ? aText.localeCompare(bText)
+                            : bText.localeCompare(aText);
+                    }
+                });
+    
+                filasOrdenadas.forEach(fila => tbody.appendChild(fila));
+            }
+    
+            function actualizarIconosYClases(clickedHeader, asc) {
+                headers.forEach(h => {
+                    h.classList.remove('asc', 'desc');
+                    const icon = h.querySelector('.sort-icon');
+                    if (icon) icon.textContent = '⇅';
+                });
+    
+                clickedHeader.classList.add(asc ? 'asc' : 'desc');
+                const icon = clickedHeader.querySelector('.sort-icon');
+                if (icon) icon.textContent = asc ? '▲' : '▼';
+            }
+    
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const colIndex = parseInt(header.dataset.col);
+                    const isCurrentlyAsc = header.classList.contains('asc');
+                    const asc = !isCurrentlyAsc;
+    
+                    ordenarTablaPorColumna(colIndex, asc);
+                    actualizarIconosYClases(header, asc);
+                });
+            });
+    
+            // Por defecto, ordenamos por ID si es la primera vez (podés protegerlo con una bandera si querés evitar duplicados)
+            if (headers.length > 0 && !document.body.classList.contains('ordenamiento-inicial')) {
+                const defaultHeader = headers[0];
+                ordenarTablaPorColumna(0, true);
+                actualizarIconosYClases(defaultHeader, true);
+                document.body.classList.add('ordenamiento-inicial');
+            }
+        }
+    
+        // Activamos al cargar la página
+        activarOrdenamiento();
+    
+        // Activamos también luego de AJAX
+        const inputBusqueda = document.getElementById('busqueda-socio');
+        const tablaDiv = document.getElementById('tabla-socios');
+    
+        inputBusqueda.addEventListener('input', function () {
+            const query = inputBusqueda.value;
+    
+            fetch(`/socios/ajax/tabla_socios/?q=${encodeURIComponent(query)}`)
+                .then(response => response.text())
+                .then(html => {
+                    tablaDiv.innerHTML = html;
+                    activarOrdenamiento();  // 👈 Reasignar eventos después del reemplazo
+                })
+                .catch(err => console.error("Error al actualizar tabla:", err));
+        });
+    });
+</script>
 {% endblock %}

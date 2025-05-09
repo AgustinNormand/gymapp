@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from .models import RegistroEntrada
 from datetime import date
 from django.db.models import Q
@@ -8,50 +7,53 @@ from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from .models import RegistroEntrada
-from socios.models import Socio
-from django.views.decorators.http import require_POST
 from django.db.models import Prefetch
 from socios.models import Observacion
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect
-from ejercicios.models import Ejercicio, RegistroEjercicio
+from django.shortcuts import get_object_or_404
+from ejercicios.models import Ejercicio
 
-def listar_entradas(request):
-    hoy = date.today()
+############ ABM de Entradas ############
 
-    fecha_desde = request.GET.get('fecha_desde')
-    fecha_hasta = request.GET.get('fecha_hasta')
-    socio = request.GET.get('socio')
+@require_POST
+def alta_entrada(request):
+    # Este método se encarga de confirmar la entrada de un socio al gimnasio.
+    # Se recibe el ID del socio desde el formulario y se busca en la base de datos.
+    # Si se encuentra, se crea un nuevo registro de entrada y se redirige a la vista de registro de entrada.
+    # Si no se encuentra, se muestra un mensaje de error.
+    # Se utiliza el decorador @require_POST para asegurarse de que solo se acepten solicitudes POST.
 
-    entradas = RegistroEntrada.objects.all()
+    socio_id = request.POST.get('socio_id')
+    if socio_id:
+        socio = Socio.objects.filter(id=socio_id).first()
+        if socio:
+            RegistroEntrada.objects.create(socio=socio)
+            messages.success(request, f'Entrada registrada para {socio.nombre} {socio.apellido}.')
+        else:
+            messages.error(request, 'Socio no encontrado.')
+    else:
+        messages.error(request, 'No se proporcionó un ID de socio.')
+    return redirect('registrar_entrada')
 
-    if fecha_desde:
-        entradas = entradas.filter(fecha_hora__date__gte=fecha_desde)
+def eliminar_entrada(request, id):
+    # Este método se encarga de eliminar la entrada de un socio al gimnasio.
+    # Se recibe el ID de la entrada a eliminar y se busca en la base de datos.
+    # Si se encuentra, se elimina y se redirige a la vista de registro de entrada.
+    # Si no se encuentra, se muestra un mensaje de error.
 
-    if fecha_hasta:
-        entradas = entradas.filter(fecha_hora__date__lte=fecha_hasta)
+    entrada = get_object_or_404(RegistroEntrada, id=id)
+    entrada.delete()
 
-    if socio:
-        entradas = entradas.filter(
-            Q(socio__nombre__icontains=socio) | 
-            Q(socio__apellido__icontains=socio)
-        )
+    messages.success(request, f"Asistencia de {entrada.socio} eliminada correctamente.")
+    #return redirect('registrar_entrada')
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
-    if not fecha_desde and not fecha_hasta and not socio:
-        entradas = entradas.filter(fecha_hora__date=hoy)
+# No se permiten modificaciones a las entradas ya registradas, por fuera del admin
 
-    entradas = entradas.order_by('-fecha_hora')
-
-    return render(request, 'registros/listar_entradas.html', {
-        'entradas': entradas,
-        'fecha_desde': fecha_desde or hoy.strftime('%Y-%m-%d'),
-        'fecha_hasta': fecha_hasta or hoy.strftime('%Y-%m-%d'),
-        'socio': socio or '',
-    })
+############ Otros métodos ############
 
 def registrar_entrada(request):
+    # Este método se encarga de registrar la entrada de un socio al gimnasio.
+
     ahora = now()
     inicio_hora = ahora.replace(minute=0, second=0, microsecond=0)
     fin_hora = ahora.replace(minute=59, second=59, microsecond=999999)
@@ -86,34 +88,42 @@ def registrar_entrada(request):
         'ejercicios': ejercicios,
     })
 
+def listar_entradas(request):
+    hoy = date.today()
 
-def buscar_socios(request):
-    q = request.GET.get('q', '')
-    socios = Socio.objects.filter(
-        Q(nombre__icontains=q) | Q(apellido__icontains=q)
-    )[:10]
-    resultados = [
-        {'id': socio.id, 'nombre_completo': f'{socio.nombre} {socio.apellido}'}
-        for socio in socios
-    ]
-    return JsonResponse(resultados, safe=False)
+    fecha_desde = request.GET.get('fecha_desde')
+    fecha_hasta = request.GET.get('fecha_hasta')
+    socio = request.GET.get('socio')
 
-@require_POST
-def confirmar_entrada(request):
-    socio_id = request.POST.get('socio_id')
-    if socio_id:
-        socio = Socio.objects.filter(id=socio_id).first()
-        if socio:
-            RegistroEntrada.objects.create(socio=socio)
-            messages.success(request, f'Entrada registrada para {socio.nombre} {socio.apellido}.')
-        else:
-            messages.error(request, 'Socio no encontrado.')
-    else:
-        messages.error(request, 'No se proporcionó un ID de socio.')
-    return redirect('registrar_entrada')
+    entradas = RegistroEntrada.objects.all()
 
-def eliminar_entrada(request, id):
-    entrada = get_object_or_404(RegistroEntrada, id=id)
-    entrada.delete()
-    messages.success(request, f"Asistencia de {entrada.socio} eliminada correctamente.")
-    return redirect('registrar_entrada')
+    if fecha_desde:
+        entradas = entradas.filter(fecha_hora__date__gte=fecha_desde)
+
+    if fecha_hasta:
+        entradas = entradas.filter(fecha_hora__date__lte=fecha_hasta)
+
+    if socio:
+        entradas = entradas.filter(
+            Q(socio__nombre__icontains=socio) | 
+            Q(socio__apellido__icontains=socio)
+        )
+
+    if not fecha_desde and not fecha_hasta and not socio:
+        entradas = entradas.filter(fecha_hora__date=hoy)
+
+    entradas = entradas.order_by('-fecha_hora')
+
+    return render(request, 'registros/listar_entradas.html', {
+        'entradas': entradas,
+        'fecha_desde': fecha_desde or hoy.strftime('%Y-%m-%d'),
+        'fecha_hasta': fecha_hasta or hoy.strftime('%Y-%m-%d'),
+        'socio': socio or '',
+    })
+
+
+
+
+
+
+

@@ -30,6 +30,7 @@ urlpatterns = [
     path('registros/', include('registros.urls')),
     path('pagos/', include('pagos.urls')),
     path('ejercicios/', include('ejercicios.urls')),
+    path('modalidades/', include('modalidades.urls')),
 ]
 
 # Solo en modo DEBUG, servir archivos estáticos
