@@ -4,9 +4,9 @@
           <th class="sortable asc" data-col="0">ID <span class="sort-icon">▲</span></th>
           <th class="sortable" data-col="1">Nombre <span class="sort-icon">⇅</span></th>
           <th class="sortable" data-col="2">Apellido <span class="sort-icon">⇅</span></th>
-          <th class="sortable" data-col="3">Email <span class="sort-icon">⇅</span></th>
           <th class="sortable" data-col="4">Teléfono <span class="sort-icon">⇅</span></th>
-          <th class="sortable" data-col="5">Estado de Cuota <span class="sort-icon">⇅</span></th>
+          <th class="sortable" data-col="5">Datos Completos <span class="sort-icon">⇅</span></th>
+          <th class="sortable" data-col="6">Estado de Cuota <span class="sort-icon">⇅</span></th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -15,9 +15,17 @@
             <tr>
                 <td>{{ item.socio.id }}</td>
                 <td>{{ item.socio.nombre }}</td>
-                <td>{{ item.socio.apellido }}</td>
-                <td>{{ item.socio.email }}</td>
+                <td>
+                    {{ item.socio.apellido }}
+                </td>
                 <td>{{ item.socio.telefono }}</td>
+                <td>
+                    {% if item.socio.has_all_data %}
+                        <i class="bi bi-check-circle-fill text-success" title="Datos completos"></i>
+                    {% else %}
+                        <i class="bi bi-info-circle-fill text-warning" title="Faltan datos opcionales"></i>
+                    {% endif %}
+                </td>
                 <td>
                     <span class="badge bg-{{ item.color_cuota }}">
                         {{ item.estado_cuota }}

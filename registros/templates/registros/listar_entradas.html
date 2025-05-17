@@ -37,7 +37,12 @@
         <tbody>
             {% for entrada in entradas %}
                 <tr>
-                    <td>{{ entrada.socio.nombre }} {{ entrada.socio.apellido }}</td>
+                    <td>
+                        {{ entrada.socio.nombre }} {{ entrada.socio.apellido }}
+                        {% if not entrada.socio.has_all_data %}
+                            <i class="bi bi-info-circle-fill text-warning ms-1" title="Faltan datos opcionales"></i>
+                        {% endif %}
+                    </td>
                     <td>{{ entrada.fecha_hora|date:"d/m/Y" }}</td>
                     <td>{{ entrada.fecha_hora|time:"H:i" }}</td>
                     <td>

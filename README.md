@@ -53,24 +53,21 @@ docker cp backup_gymdb.backup gymapp-db-1:/tmp/
 
 docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -v /tmp/backup_gymdb.backup
 
-## Pending Tasks
-### Infra
-[] Add Nginx to production scope
-[] Add volume to Postgres to save information
-[] Backup postgres information, to avoid SPOF
-
-### Functional
-[] Ver de crear distintos usuarios, con roles diferentes, para los distintos profes
-
-### Dash
-[] Agregar gráficos de cantidad de usuarios mensuales
-
-### Other
-[] Script que periodicamente pullea el repo en la rama main, y si hay cambios, hace un "docker-compose up"
-[] Script que hace un backup de la base de datos
-[] Deploy de la solución en GCP, en la capa Free Tier
-[] Si el socio no tiene modalidad asignada, que me permita asignarle una, y luego registrar el pago, de forma más simple
-[] Agregar un tooltip a las acciones, para que quede claro que hace cada una
+## Pending Tasks - Sorted by priority
+[] [Functional] [Easy] Agregar un ícono distintivo, cuando falta cargarle algún dato a un socio (Email, Teléfono, cumpleaños, etc)
+[] [Functional] [Easy] Armar un ranking, ordenado por cantidad de días sin venir, de usuarios pagos, que vinieron algúna vez al més
+[] [Functional] [Easy] Levantar un warning, cuando una persona, hace un més, no modifica el peso de sus ejercicios
+[] [Infra] [Easy] Make another backup of postgres information, to avoid SPOF
+[] [Other] [Easy] Agregar un tooltip a las acciones, para que quede claro que hace cada una
+[] [Dash] [Easy] Agregar gráficos de cantidad de usuarios mensuales
+[] [Dash] [Easy] Agregar gráfico de la evolución de los pesos de un socio
+[] [Dash] [Easy] Agregar gráfico de las asistencias semanales de los socios
+[] [Functional] [Medium] Ver de crear distintos usuarios, con roles diferentes, para los distintos profes
+[] [Infra] [Medium] Add volume to Postgres to save information
+[] [Infra] [Medium] Add Nginx to production scope
+[] [Other] [Medium] Script que periodicamente pullea el repo en la rama main, y si hay cambios, hace un "docker-compose up"
+[] [Other] [Medium] Script que hace un backup de la base de datos
+[] [Other] [Hard] Deploy de la solución en GCP, en la capa Free Tier
 
 ### Next steps - Going to the moon
 [] Agregar cantidad de ingresos estimados

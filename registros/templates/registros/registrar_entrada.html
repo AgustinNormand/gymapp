@@ -35,6 +35,9 @@
         <tr>
             <td class="text-center">
                 {{ entrada.socio.nombre }} {{ entrada.socio.apellido }}
+                {% if not entrada.socio.has_all_data %}
+                    <i class="bi bi-info-circle-fill text-warning ms-1" title="Faltan datos opcionales"></i>
+                {% endif %}
             </td>
             <td class="text-center">
                 {% with entrada.socio as socio %}
