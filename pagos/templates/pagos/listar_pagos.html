@@ -15,7 +15,11 @@
         <tbody>
             {% for pago in pagos %}
                 <tr>
-                    <td>{{ pago.socio.nombre }} {{ pago.socio.apellido }}</td>
+                    <td>{{ pago.socio.nombre }} {{ pago.socio.apellido }}
+                        {% if not socio.has_all_data %}
+                            <i class="bi bi-info-circle-fill text-warning ms-1" title="Faltan datos opcionales"></i>
+                        {% endif %}
+                    </td>
                     <td>${{ pago.monto }}</td>
                     <td>{{ pago.fecha_pago|date:"d/m/Y" }}</td>
                     <td>{{ pago.fecha_vencimiento|date:"d/m/Y" }}</td>

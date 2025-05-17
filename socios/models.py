@@ -14,6 +14,14 @@ class Socio(models.Model):
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
     
+    def has_all_data(self):
+        """Verifica si el socio tiene todos los datos completos"""
+
+        if not self.fecha_nacimiento or not self.telefono:
+            return False
+        return True
+        
+    
     @property
     def pesos_por_ejercicio(self):
         if hasattr(self, '_cached_pesos'):
@@ -77,6 +85,13 @@ class Socio(models.Model):
         limite = modalidad.modalidad.dias_por_semana
         cantidad = self.cantidad_asistencias_semana_actual()
         return cantidad > limite
+    
+    # Método para saber cuantos días hace que el socio no asiste
+    def dias_sin_asistir(self):
+        if not self.registroentrada_set.exists():
+            return "-"
+        ultima_asistencia = self.registroentrada_set.order_by('-fecha_hora').first()
+        return (now().date() - ultima_asistencia.fecha_hora.date()).days
 
     
 class Observacion(models.Model):
