@@ -14,16 +14,37 @@
     document.addEventListener('DOMContentLoaded', function () {
         const inputBusqueda = document.getElementById('busqueda-socio');
         const tabla = document.getElementById('tabla-socios');
-    
-        inputBusqueda.addEventListener('input', function () {
-            const query = inputBusqueda.value;
-    
+        let timeoutId;
+
+        // Función que hace la búsqueda
+        function buscarSocios(query) {
             fetch(`/socios/ajax/tabla_socios/?q=${encodeURIComponent(query)}`)
                 .then(response => response.text())
                 .then(html => {
                     tabla.innerHTML = html;
                 })
                 .catch(err => console.error("Error al actualizar tabla de socios:", err));
+        }
+
+        // Evento input con debounce
+        inputBusqueda.addEventListener('input', function () {
+            const query = inputBusqueda.value;
+            
+            // Limpiar timeout anterior si existe
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+            
+            // Crear nuevo timeout
+            timeoutId = setTimeout(() => {
+                // Solo hacer la búsqueda si hay al menos 2 caracteres
+                if (query.length >= 2) {
+                    buscarSocios(query);
+                } else if (query.length === 0) {
+                    // Si el input está vacío, mostrar todos los socios
+                    buscarSocios('');
+                }
+            }, 300); // Esperar 300ms antes de hacer la búsqueda
         });
     });
 </script>
