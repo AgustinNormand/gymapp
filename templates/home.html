@@ -35,60 +35,377 @@
     </div>
 
     <!-- Gráfico de Asistencias por Hora -->
-    <h2 class="mt-5">Asistencias por Hora</h2>
-
-    <form method="get" class="row g-3 align-items-center mb-4">
-        <input type="hidden" name="grupo" value="{{ grupo }}">
-        <div class="col-auto">
-            <label for="filtro" class="col-form-label">Ver asistencias de:</label>
-        </div>
-        <div class="col-auto">
-            <select id="filtro" name="filtro" class="form-select" onchange="this.form.submit()">
-                <option value="hoy" {% if filtro == 'hoy' %}selected{% endif %}>Hoy</option>
-                <option value="semana" {% if filtro == 'semana' %}selected{% endif %}>Últimos 7 días</option>
-                <option value="mes" {% if filtro == 'mes' %}selected{% endif %}>Este mes</option>
-            </select>
-        </div>
-    </form>
-
+    <h2 class="mt-5">Asistencias por Hora (Promedio Diario)</h2>
+    
+    <!-- Filtro para el gráfico de horas -->
+    <div class="card shadow p-4 mb-4">
+        <h5>Rango de Fechas</h5>
+        <form method="get" class="row g-3 align-items-end">
+            <!-- Mantener otros parámetros de filtrado -->
+            <input type="hidden" name="grupo" value="{{ grupo }}">
+            {% if request.GET.filtro %}
+            <input type="hidden" name="filtro" value="{{ request.GET.filtro }}">
+            {% endif %}
+            <div class="col-md-4">
+                <label for="fecha_inicio_hora" class="form-label">Fecha de inicio</label>
+                <input type="date" class="form-control" id="fecha_inicio_hora" name="fecha_inicio_hora" 
+                       value="{{ request.GET.fecha_inicio_hora|default:'' }}">
+            </div>
+            <div class="col-md-4">
+                <label for="fecha_fin_hora" class="form-label">Fecha de fin</label>
+                <input type="date" class="form-control" id="fecha_fin_hora" name="fecha_fin_hora"
+                       value="{{ request.GET.fecha_fin_hora|default:'' }}">
+            </div>
+            <div class="col-md-4">
+                <button type="submit" name="actualizar_horas" class="btn btn-primary me-2">
+                    <i class="fas fa-filter"></i> Aplicar Filtro
+                </button>
+                <a href="?" class="btn btn-outline-secondary">
+                    <i class="fas fa-sync"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+    
     <div class="card shadow p-4 mb-5">
-        <canvas id="asistenciasHoraChart" height="100"></canvas>
+        <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+            <canvas id="asistenciasHoraChart"></canvas>
+        </div>
     </div>
 
+    <!-- Gráfico de Asistencias por Mes -->
+    <h2 class="mt-5">Asistencias por Mes</h2>
+    
+    <!-- Filtro para el gráfico de meses -->
+    <div class="card shadow p-4 mb-4">
+        <h5>Rango de Fechas</h5>
+        <form method="get" class="row g-3 align-items-end">
+            <!-- Mantener otros parámetros de filtrado -->
+            {% if request.GET.filtro %}
+            <input type="hidden" name="filtro" value="{{ request.GET.filtro }}">
+            {% endif %}
+            <div class="col-md-4">
+                <label for="fecha_inicio_mes" class="form-label">Fecha de inicio</label>
+                <input type="date" class="form-control" id="fecha_inicio_mes" name="fecha_inicio_mes" 
+                       value="{{ request.GET.fecha_inicio_mes|default:'' }}">
+            </div>
+            <div class="col-md-4">
+                <label for="fecha_fin_mes" class="form-label">Fecha de fin</label>
+                <input type="date" class="form-control" id="fecha_fin_mes" name="fecha_fin_mes"
+                       value="{{ request.GET.fecha_fin_mes|default:'' }}">
+            </div>
+            <div class="col-md-4">
+                <button type="submit" name="actualizar_meses" class="btn btn-primary me-2">
+                    <i class="fas fa-filter"></i> Aplicar Filtro
+                </button>
+                <a href="?" class="btn btn-outline-secondary">
+                    <i class="fas fa-sync"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="card shadow p-4 mb-5">
+        <h3 class="mb-4">Asistencias por Mes</h3>
+        <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+            <canvas id="asistenciasMesChart" style="width: 100%; height: 100%;"></canvas>
+        </div>
+    </div>
+    
     <script>
-    var ctx = document.getElementById('asistenciasHoraChart').getContext('2d');
-    var asistenciasChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: {{ horas|safe }},
-            datasets: [{
-                label: 'Cantidad de Asistencias ({{ filtro|title }})',
-                data: {{ cantidades|safe }},
-                backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Hora del Día'
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
+    // Función para formatear fecha a YYYY-MM-DD
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // Establecer fechas por defecto solo si no hay parámetros en la URL
+    document.addEventListener('DOMContentLoaded', function() {
+        // Verificar si hay parámetros en la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Si no hay parámetros, establecer valores por defecto
+        if (urlParams.toString() === '') {
+            const hoy = new Date();
+            
+            // Para el gráfico de horas (mostrar solo el día actual por defecto)
+            const fechaFinHora = document.getElementById('fecha_fin_hora');
+            const fechaInicioHora = document.getElementById('fecha_inicio_hora');
+            
+            if (fechaFinHora && fechaInicioHora) {
+                const hoyStr = formatDate(hoy);
+                fechaFinHora.value = hoyStr;
+                fechaInicioHora.value = hoyStr;
+                
+                // Enviar el formulario automáticamente para cargar los datos
+                const form = fechaInicioHora.closest('form');
+                if (form) {
+                    form.submit();
                 }
             }
+            
+            // Para el gráfico de meses (últimos 12 meses completos)
+            const fechaFinMes = document.getElementById('fecha_fin');
+            const fechaInicioMes = document.getElementById('fecha_inicio');
+            
+            if (fechaFinMes && fechaInicioMes) {
+                // Último día del mes actual
+                const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+                
+                // Primer día del mes hace 11 meses
+                let anioInicio = hoy.getFullYear();
+                let mesInicio = hoy.getMonth() - 11;
+                if (mesInicio <= 0) {
+                    mesInicio += 12;
+                    anioInicio--;
+                }
+                const primerDiaHace11Meses = new Date(anioInicio, mesInicio - 1, 1);
+                
+                fechaFinMes.value = formatDate(ultimoDiaMes);
+                fechaInicioMes.value = formatDate(primerDiaHace11Meses);
+            }
+        }
+    });
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var ctx = document.getElementById('asistenciasHoraChart');
+        if (ctx) {
+            // Obtener datos de las variables de Django
+            var horas = JSON.parse('{{ horas|safe }}');
+            var cantidades = JSON.parse('{{ cantidades|safe }}');
+            
+            console.log('Horas:', horas);
+            console.log('Cantidades:', cantidades);
+            
+            var asistenciasChart = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: horas,
+                    datasets: [{
+                        label: 'Promedio de Asistencias por Hora',
+                        data: cantidades,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                precision: 0
+                            },
+                            title: {
+                                display: true,
+                                text: 'Promedio de Asistencias'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Hora del Día'
+                            }
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Asistencias Promedio por Hora del Día'
+                        }
+                    }
+                }
+            });
+        }
+    });
+    </script>
+    
+    <!-- Script para el gráfico de asistencias por mes -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Inicializando gráfico de asistencias por mes...');
+        
+        var ctxMes = document.getElementById('asistenciasMesChart');
+        if (!ctxMes) {
+            console.error('No se encontró el elemento canvas para el gráfico de asistencias por mes');
+            return;
+        }
+        
+        try {
+            // Obtener datos de las variables de Django
+            var mesesEtiquetas = [];
+            var cantidadesMes = [];
+            
+            try {
+                // Parsear los datos JSON
+                mesesEtiquetas = JSON.parse('{{ meses_etiquetas|escapejs }}');
+                cantidadesMes = JSON.parse('{{ cantidades_mes|escapejs }}');
+                
+                console.log('Datos recibidos para gráfico de meses:');
+                console.log('Meses:', mesesEtiquetas);
+                console.log('Cantidades:', cantidadesMes);
+                
+                // Verificar que los datos sean arrays
+                if (!Array.isArray(mesesEtiquetas) || !Array.isArray(cantidadesMes)) {
+                    console.error('Error: Los datos no son arrays válidos');
+                    console.error('Tipo de mesesEtiquetas:', typeof mesesEtiquetas);
+                    console.error('Tipo de cantidadesMes:', typeof cantidadesMes);
+                    return;
+                }
+                
+                // Verificar que los arrays tengan la misma longitud
+                if (mesesEtiquetas.length !== cantidadesMes.length) {
+                    console.warn('Los arrays de etiquetas y datos tienen longitudes diferentes:', 
+                        mesesEtiquetas.length, 'vs', cantidadesMes.length);
+                    // Ajustar la longitud al mínimo de ambos arrays
+                    var minLength = Math.min(mesesEtiquetas.length, cantidadesMes.length);
+                    if (minLength === 0) {
+                        console.error('No hay datos para mostrar en el gráfico');
+                        return;
+                    }
+                    mesesEtiquetas = mesesEtiquetas.slice(0, minLength);
+                    cantidadesMes = cantidadesMes.slice(0, minLength);
+                }
+                
+                console.log('Inicializando gráfico de asistencias por mes con', mesesEtiquetas.length, 'puntos de datos');
+                
+            } catch (e) {
+                console.error('Error al procesar los datos del gráfico:', e);
+                return;
+            }
+            
+            // Configuración del gráfico
+            var config = {
+                type: 'bar',
+                data: {
+                    labels: mesesEtiquetas,
+                    datasets: [{
+                        label: 'Socios Únicos',
+                        data: cantidadesMes,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Cantidad de Socios Únicos',
+                                font: {
+                                    weight: 'bold',
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                display: true,
+                                drawBorder: true,
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                precision: 0,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Mes',
+                                font: {
+                                    weight: 'bold',
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Asistencias: ' + context.parsed.y;
+                                }
+                            }
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            top: 10,
+                            right: 20,
+                            bottom: 10,
+                            left: 20
+                        }
+                    }
+                }
+            };
+            
+            // Crear el gráfico
+            new Chart(ctxMes, config);
+        } catch (e) {
+            console.error('Error al crear el gráfico:', e);
         }
     });
     </script>
