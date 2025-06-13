@@ -4,290 +4,243 @@ from registros.models import RegistroEntrada
 from pagos.models import Pago
 from datetime import date, datetime, timedelta
 from django.db.models.functions import ExtractHour, ExtractMonth, ExtractYear
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F
 from django.utils.timezone import now
 
 def home(request):
     hoy = date.today()
     grupo = request.GET.get('grupo', '')  # Obtener el parámetro 'grupo' de la URL, vacío por defecto
-    primer_dia_mes = hoy.replace(day=1)  # Definir al inicio para usarlo en todo el contexto
     total_socios = Socio.objects.filter().count()
     asistencias_hoy = RegistroEntrada.objects.filter(fecha_hora__date=hoy).count()
     
-    # --- Gráfico de asistencias por mes ---
-    # Obtener parámetros de fechas para el gráfico mensual
-    fecha_inicio_mes = request.GET.get('fecha_inicio_mes')
-    fecha_fin_mes = request.GET.get('fecha_fin_mes')
+    # --- Configuración de fechas y agrupación ---
+    tipo_agrupacion = request.GET.get('tipo_agrupacion', 'hora')  # Por defecto agrupar por hora
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
     
-    # Validar y establecer fechas por defecto para el gráfico mensual (últimos 12 meses)
+    # Validar y establecer fechas por defecto según el tipo de agrupación
     try:
-        if fecha_inicio_mes and fecha_fin_mes:
-            fecha_inicio_mes = datetime.strptime(fecha_inicio_mes, '%Y-%m-%d').date()
-            fecha_fin_mes = datetime.strptime(fecha_fin_mes, '%Y-%m-%d').date()
-        else:
-            fecha_fin_mes = hoy
-            fecha_inicio_mes = fecha_fin_mes - timedelta(days=365)  # Últimos 12 meses por defecto
-    except (ValueError, TypeError):
-        fecha_fin_mes = hoy
-        fecha_inicio_mes = fecha_fin_mes - timedelta(days=365)  # Últimos 12 meses por defecto
-    
-    # Asegurarse de que la fecha de inicio sea menor que la de fin
-    if fecha_inicio_mes >= fecha_fin_mes:
-        fecha_inicio_mes = fecha_fin_mes - timedelta(days=30)  # Mostrar al menos 1 mes
-
-    # Obtener datos para el gráfico de asistencias por mes
-    meses_nombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
-    meses_etiquetas = []
-    cantidades_mes = []
-    
-    # Generar lista de meses en el rango seleccionado
-    current_date = date(fecha_inicio_mes.year, fecha_inicio_mes.month, 1)
-    end_date = date(fecha_fin_mes.year, fecha_fin_mes.month, 1)
-    
-    while current_date <= end_date:
-        # Obtener el primer y último día del mes
-        primer_dia = current_date
-        if current_date.month == 12:
-            ultimo_dia = date(current_date.year + 1, 1, 1) - timedelta(days=1)
-        else:
-            ultimo_dia = date(current_date.year, current_date.month + 1, 1) - timedelta(days=1)
-        
-        # Ajustar fechas según el rango seleccionado
-        if primer_dia < fecha_inicio_mes:
-            primer_dia = fecha_inicio_mes
-        if ultimo_dia > fecha_fin_mes:
-            ultimo_dia = fecha_fin_mes
-        
-        # Contar asistencias de socios únicos para este mes
-        try:
-            # Asegurarse de que las fechas sean válidas
-            if primer_dia > ultimo_dia:
-                total_asistencias = 0
-            else:
-                total_asistencias = RegistroEntrada.objects.filter(
-                    fecha_hora__date__range=(primer_dia, ultimo_dia)
-                ).values('socio').distinct().count()
+        if fecha_inicio and fecha_fin:
+            fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
+            fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
             
-            # Formatear la etiqueta del mes
-            etiqueta_mes = f"{meses_nombres[current_date.month-1]}/{str(current_date.year)[2:]}"
-            
-            # Agregar a las listas
-            meses_etiquetas.append(etiqueta_mes)
-            cantidades_mes.append(total_asistencias)
-            
-        except Exception:
-            etiqueta_mes = f"{meses_nombres[current_date.month-1]}/{str(current_date.year)[2:]}"
-            meses_etiquetas.append(etiqueta_mes)
-            cantidades_mes.append(0)
-        
-        # Pasar al primer día del siguiente mes
-        if current_date.month == 12:
-            current_date = date(current_date.year + 1, 1, 1)
+            # Asegurar que la fecha de inicio sea menor o igual que la de fin
+            if fecha_inicio > fecha_fin:
+                fecha_inicio, fecha_fin = fecha_fin, fecha_inicio
         else:
-            current_date = date(current_date.year, current_date.month + 1, 1)
-    
-    # --- Gráfico de asistencias por hora ---
-    # Obtener parámetros de fechas para el gráfico de horas
-    fecha_inicio_hora = request.GET.get('fecha_inicio_hora')
-    fecha_fin_hora = request.GET.get('fecha_fin_hora')
-    
-    # Validar y establecer fechas por defecto para el gráfico de horas
-    try:
-        if fecha_inicio_hora and fecha_fin_hora:
-            fecha_inicio_hora = datetime.strptime(fecha_inicio_hora, '%Y-%m-%d').date()
-            fecha_fin_hora = datetime.strptime(fecha_fin_hora, '%Y-%m-%d').date()
-            
-            # Asegurarse de que la fecha de inicio sea menor o igual que la de fin
-            if fecha_inicio_hora > fecha_fin_hora:
-                fecha_inicio_hora, fecha_fin_hora = fecha_fin_hora, fecha_inicio_hora
-        else:
-            # Por defecto, mostrar solo el día actual
-            fecha_inicio_hora = hoy
-            fecha_fin_hora = hoy
-    except (ValueError, TypeError):
-        # En caso de error, mostrar solo el día actual
-        fecha_inicio_hora = hoy
-        fecha_fin_hora = hoy
+            # Valores por defecto según el tipo de agrupación
+            if tipo_agrupacion == 'hora':
+                fecha_inicio = hoy
+                fecha_fin = hoy
+            elif tipo_agrupacion == 'dia':
+                fecha_fin = hoy
+                fecha_inicio = hoy - timedelta(days=30)  # Últimos 30 días
+            elif tipo_agrupacion == 'semana':
+                fecha_fin = hoy
+                fecha_inicio = hoy - timedelta(weeks=12)  # Últimas 12 semanas
+            elif tipo_agrupacion == 'mes':
+                fecha_fin = hoy
+                fecha_inicio = hoy.replace(day=1) - relativedelta(months=11)  # Últimos 12 meses completos
+                fecha_inicio = fecha_inicio.replace(day=1)  # Asegurar que sea el primer día del mes
+            else:  # anual
+                fecha_fin = hoy
+                fecha_inicio = hoy.replace(month=1, day=1, year=hoy.year-4)  # Últimos 5 años
+    except (ValueError, TypeError) as e:
+        # En caso de error, usar valores por defecto
+        fecha_inicio = hoy
+        fecha_fin = hoy
         
-    # Obtener parámetros de fechas para el gráfico de meses
-    fecha_inicio_mes = request.GET.get('fecha_inicio')
-    fecha_fin_mes = request.GET.get('fecha_fin')
+    # --- Procesar datos según el tipo de agrupación ---
+    etiquetas = []
+    cantidades = []
+    tipo_eje_x = ''
     
-    # Validar y establecer fechas por defecto para el gráfico de meses
-    try:
-        if fecha_inicio_mes and fecha_fin_mes:
-            fecha_inicio_mes = datetime.strptime(fecha_inicio_mes, '%Y-%m-%d').date()
-            fecha_fin_mes = datetime.strptime(fecha_fin_mes, '%Y-%m-%d').date()
-        else:
-            # Por defecto, mostrar los últimos 12 meses completos
-            # Establecer la fecha de fin al último día del mes actual
-            primer_dia_prox_mes = date(hoy.year + (hoy.month == 12), (hoy.month % 12) + 1, 1)
-            fecha_fin_mes = primer_dia_prox_mes - timedelta(days=1)  # Último día del mes actual
-            
-            # Establecer la fecha de inicio al primer día del mes hace 11 meses
-            primer_dia_mes_actual = hoy.replace(day=1)
-            if primer_dia_mes_actual.month <= 11:
-                fecha_inicio_mes = date(primer_dia_mes_actual.year - 1, 13 - primer_dia_mes_actual.month, 1)
-            else:
-                fecha_inicio_mes = date(primer_dia_mes_actual.year - 1, primer_dia_mes_actual.month - 11, 1)
-    except (ValueError, TypeError):
-        # En caso de error, usar el rango por defecto de 12 meses
-        primer_dia_prox_mes = date(hoy.year + (hoy.month == 12), (hoy.month % 12) + 1, 1)
-        fecha_fin_mes = primer_dia_prox_mes - timedelta(days=1)
-        fecha_inicio_mes = date(fecha_fin_mes.year - 1, fecha_fin_mes.month, 1)
+    if tipo_agrupacion == 'hora':
+        # Agrupar por hora del día (socios únicos)
+        asistencias = RegistroEntrada.objects.filter(
+            fecha_hora__date__range=(fecha_inicio, fecha_fin)
+        ).annotate(
+            hora=ExtractHour('fecha_hora')
+        ).values('hora', 'socio_id').distinct()
         
-    # Determinar si es un solo día o un rango para el gráfico de horas
-    es_un_solo_dia = (fecha_inicio_hora == fecha_fin_hora)
-    
-    # Obtener datos para el gráfico de asistencias por hora
-    asistencias_por_hora = RegistroEntrada.objects.filter(
-        fecha_hora__date__range=(fecha_inicio_hora, fecha_fin_hora)
-    ).annotate(
-        hora=ExtractHour('fecha_hora')
-    ).values('hora').annotate(
-        total_asistencias=Count('id')
-    ).order_by('hora')
-    
-    # Crear lista completa de horas (0-23)
-    horas_completas = [{'hora': h, 'cantidad': 0} for h in range(24)]
-    
-    # Procesar los resultados según si es un día o rango
-    if es_un_solo_dia:
-        # Para un solo día, mostrar el conteo exacto (números enteros)
-        for registro in asistencias_por_hora:
+        # Contar socios únicos por hora
+        socios_por_hora = {h: set() for h in range(24)}
+        
+        for registro in asistencias:
             hora = registro['hora']
             if 0 <= hora <= 23:
-                valor = int(registro['total_asistencias'])
-                horas_completas[hora]['cantidad'] = valor
-    else:
-        # Para rango de días, calcular el promedio diario
-        dias_rango = (fecha_fin_hora - fecha_inicio_hora).days + 1
+                socios_por_hora[hora].add(registro['socio_id'])
+        
+        # Calcular promedio diario si es un rango de fechas
+        dias_rango = (fecha_fin - fecha_inicio).days + 1
         if dias_rango < 1:
             dias_rango = 1
             
-        for registro in asistencias_por_hora:
-            hora = registro['hora']
-            if 0 <= hora <= 23:
-                # Calcular el promedio redondeado a 1 decimal
-                promedio = round(registro['total_asistencias'] / dias_rango, 1)
-                horas_completas[hora]['cantidad'] = promedio
-    
-    # Ordenar por hora y preparar datos para el template
-    horas_completas.sort(key=lambda x: x['hora'])
-    horas = [f"{registro['hora']:02d}:00" for registro in horas_completas]
-    cantidades = [float(registro['cantidad']) for registro in horas_completas]  # Asegurar que sean números flotantes
-    
-    # --- Lista de asistencias (filtro simple) ---
-    filtro = request.GET.get('filtro', 'hoy')  # valor por defecto: hoy
-    asistencias = RegistroEntrada.objects.all()
-    
-    if filtro == 'hoy':
-        asistencias = asistencias.filter(fecha_hora__date=hoy)
-    elif filtro == 'semana':
-        hace_7_dias = hoy - timedelta(days=7)
-        asistencias = asistencias.filter(fecha_hora__date__gte=hace_7_dias)
-    elif filtro == 'mes':
-        asistencias = asistencias.filter(fecha_hora__date__gte=primer_dia_mes)
-
-    asistencias_por_hora = (
-        asistencias
-        .annotate(hora=ExtractHour('fecha_hora'))
-        .values('hora')
-        .annotate(cantidad=Count('id'))
-        .order_by('hora')
-    )
-
-    # Esto debería refactorizarse, hacerse dentro del modelo de socio
-    socios = Socio.objects.all()
-    socios_con_pago = []
-    socios_sin_pago = []
-    for socio in socios:
-        if socio.estado_cuota() == 'al_dia':
-            socios_con_pago.append(socio.id)
+        # Preparar datos para el template
+        etiquetas = [f"{h:02d}:00" for h in range(24)]
+        if dias_rango > 1:
+            cantidades = [round(len(socios) / dias_rango, 1) for socios in socios_por_hora.values()]
+            titulo_grafico = f"Promedio diario de socios únicos por hora\n({fecha_inicio.strftime('%d/%m/%Y')} - {fecha_fin.strftime('%d/%m/%Y')})"
         else:
-            socios_sin_pago.append(socio.id)
-
-    asistencias_mes = RegistroEntrada.objects.filter(
-        fecha_hora__date__gte=primer_dia_mes
-    ).values_list('socio_id', flat=True).distinct()
-
-    socios_no_pago_sin_asistencia = Socio.objects.filter(id__in=socios_sin_pago).exclude(id__in=asistencias_mes).count()
-    socios_no_pago_con_asistencia = Socio.objects.filter(id__in=socios_sin_pago).filter(id__in=asistencias_mes).count()
-    socios_con_pago_sin_asistencia = Socio.objects.filter(id__in=socios_con_pago).exclude(id__in=asistencias_mes).count()
-    socios_con_pago_con_asistencia = Socio.objects.filter(id__in=socios_con_pago).filter(id__in=asistencias_mes).count()
-
-    socios_detalle = []
-    titulo_detalle = ""
-
-    if grupo:
-        if grupo == 'no_pago_sin_asistencia':
-            socios_detalle = Socio.objects.filter(id__in=socios_sin_pago).exclude(id__in=asistencias_mes)
-            titulo_detalle = "Socios no pagos y sin asistencias en el mes"
-        elif grupo == 'no_pago_con_asistencia':
-            socios_detalle = Socio.objects.filter(id__in=socios_sin_pago).filter(id__in=asistencias_mes)
-            titulo_detalle = "Socios no pagos y con asistencias en el mes"
-        elif grupo == 'pago_sin_asistencia':
-            socios_detalle = Socio.objects.filter(id__in=socios_con_pago).exclude(id__in=asistencias_mes)
-            titulo_detalle = "Socios pagos y sin asistencias en el mes"
-        elif grupo == 'pago_con_asistencia':
-            socios_detalle = Socio.objects.filter(id__in=socios_con_pago).filter(id__in=asistencias_mes)
-            titulo_detalle = "Socios pagos y con asistencias en el mes"
-
-    # Preparar datos para los gráficos
+            cantidades = [len(socios) for socios in socios_por_hora.values()]
+            titulo_grafico = f"Socios Únicos por Hora del Día ({fecha_inicio.strftime('%d/%m/%Y')})"
+        tipo_eje_x = 'Hora del día'
+        
+    elif tipo_agrupacion == 'dia':
+        # Agrupar por día
+        current_date = fecha_inicio
+        while current_date <= fecha_fin:
+            total = RegistroEntrada.objects.filter(
+                fecha_hora__date=current_date
+            ).values('socio_id').distinct().count()
+            
+            etiquetas.append(current_date.strftime('%d/%m/%Y'))
+            cantidades.append(total)
+            current_date += timedelta(days=1)
+            
+        titulo_grafico = f'Asistencias por Día ({fecha_inicio.strftime("%d/%m/%Y")} - {fecha_fin.strftime("%d/%m/%Y")})'
+        tipo_eje_x = 'Fecha'
+        
+    elif tipo_agrupacion == 'semana':
+        # Agrupar por semana
+        current_date = fecha_inicio
+        while current_date <= fecha_fin:
+            # Obtener el lunes de la semana actual
+            start_of_week = current_date - timedelta(days=current_date.weekday())
+            end_of_week = start_of_week + timedelta(days=6)
+            
+            # Ajustar fechas al rango seleccionado
+            if start_of_week < fecha_inicio:
+                start_of_week = fecha_inicio
+            if end_of_week > fecha_fin:
+                end_of_week = fecha_fin
+                
+            total = RegistroEntrada.objects.filter(
+                fecha_hora__date__range=(start_of_week, end_of_week)
+            ).values('socio_id').distinct().count()
+            
+            # Formato más compacto para las etiquetas
+            if start_of_week.month == end_of_week.month:
+                etiqueta = f"{start_of_week.day}-{end_of_week.day} {start_of_week.strftime('%b %Y')}"
+            else:
+                etiqueta = f"{start_of_week.day} {start_of_week.strftime('%b')}-{end_of_week.day} {end_of_week.strftime('%b %Y')}"
+                
+            etiquetas.append(etiqueta)
+            cantidades.append(total)
+            
+            # Mover al lunes de la siguiente semana
+            current_date = end_of_week + timedelta(days=1)
+            
+        titulo_grafico = f'Asistencias por Semana ({fecha_inicio.strftime("%d/%m/%Y")} - {fecha_fin.strftime("%d/%m/%Y")})'
+        tipo_eje_x = 'Semana'
+        
+    elif tipo_agrupacion == 'mes':
+        # Agrupar por mes
+        current_date = date(fecha_inicio.year, fecha_inicio.month, 1)
+        meses_nombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 
+                        'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+        
+        while current_date <= fecha_fin:
+            # Obtener el primer y último día del mes
+            primer_dia = current_date
+            if current_date.month == 12:
+                ultimo_dia = date(current_date.year + 1, 1, 1) - timedelta(days=1)
+            else:
+                ultimo_dia = date(current_date.year, current_date.month + 1, 1) - timedelta(days=1)
+            
+            # Ajustar fechas según el rango seleccionado
+            if primer_dia < fecha_inicio:
+                primer_dia = fecha_inicio
+            if ultimo_dia > fecha_fin:
+                ultimo_dia = fecha_fin
+                
+            # Contar asistencias para el mes
+            if primer_dia <= ultimo_dia:
+                total = RegistroEntrada.objects.filter(
+                    fecha_hora__date__range=(primer_dia, ultimo_dia)
+                ).values('socio_id').distinct().count()
+                
+                etiqueta = f"{meses_nombres[current_date.month-1]} {current_date.year}"
+                etiquetas.append(etiqueta)
+                cantidades.append(total)
+            
+            # Mover al primer día del siguiente mes
+            if current_date.month == 12:
+                current_date = date(current_date.year + 1, 1, 1)
+            else:
+                current_date = date(current_date.year, current_date.month + 1, 1)
+                
+        titulo_grafico = f'Asistencias por Mes ({fecha_inicio.strftime("%b %Y")} - {fecha_fin.strftime("%b %Y")})'
+        tipo_eje_x = 'Mes'
+        
+    else:  # tipo_agrupacion == 'anio'
+        # Agrupar por año
+        current_year = fecha_inicio.year
+        end_year = fecha_fin.year
+        
+        for year in range(current_year, end_year + 1):
+            # Determinar el rango de fechas para el año
+            start_date = max(date(year, 1, 1), fecha_inicio)
+            end_date = min(date(year, 12, 31), fecha_fin)
+            
+            total = RegistroEntrada.objects.filter(
+                fecha_hora__date__range=(start_date, end_date)
+            ).values('socio_id').distinct().count()
+            
+            etiquetas.append(str(year))
+            cantidades.append(total)
+            
+        titulo_grafico = f'Asistencias por Año ({fecha_inicio.year} - {fecha_fin.year})'
+        tipo_eje_x = 'Año'
+    
+    # Obtener los últimos registros de asistencia para la tabla
+    ultimas_asistencias = RegistroEntrada.objects.select_related('socio').order_by('-fecha_hora')[:10]
+    
+    # Aplicar filtro de búsqueda si existe
+    filtro = request.GET.get('filtro', '')
+    if filtro:
+        ultimas_asistencias = ultimas_asistencias.filter(
+            Q(socio__nombre__icontains=filtro) |
+            Q(socio__apellido__icontains=filtro) |
+            Q(socio__documento__icontains=filtro)
+        )
+    
+    # Preparar el título del detalle
+    titulo_detalle = "Últimas asistencias"
+    if filtro:
+        titulo_detalle += f" - Filtro: {filtro}"
+    
+    # Importar json y mark_safe al inicio del archivo
     import json
     from django.utils.safestring import mark_safe
     
-    # Depuración: Imprimir datos antes de la serialización
-    print("Datos para gráfico de meses antes de serializar:")
-    print("Meses etiquetas:", meses_etiquetas)
-    print("Cantidades mes:", cantidades_mes)
-    print("Tipo de meses_etiquetas:", type(meses_etiquetas))
-    print("Tipo de cantidades_mes:", type(cantidades_mes))
+    # Asegurarse de que las cantidades sean números
+    cantidades = [float(x) if x is not None else 0 for x in cantidades]
     
-    # Asegurarse de que los datos sean serializables
+    # Serializar datos para el gráfico
     try:
-        # Convertir a listas de Python
-        if not isinstance(meses_etiquetas, list):
-            meses_etiquetas = list(meses_etiquetas)
-        if not isinstance(cantidades_mes, list):
-            cantidades_mes = [int(x) for x in cantidades_mes]
-        
-        # Asegurarse de que las cantidades sean números
-        cantidades_mes = [int(x) if x is not None else 0 for x in cantidades_mes]
-        
-        # Serializar a JSON
-        horas_json = mark_safe(json.dumps(horas))
-        cantidades_json = mark_safe(json.dumps([float(x) for x in cantidades]))
-        meses_etiquetas_json = mark_safe(json.dumps(meses_etiquetas, ensure_ascii=False))
-        cantidades_mes_json = mark_safe(json.dumps(cantidades_mes))
-        
-        # Depuración: Imprimir datos después de la serialización
-        print("Datos para gráfico de meses después de serializar:")
-        print("meses_etiquetas_json:", meses_etiquetas_json)
-        print("cantidades_mes_json:", cantidades_mes_json)
-        
+        etiquetas_json = mark_safe(json.dumps(etiquetas, ensure_ascii=False))
+        cantidades_json = mark_safe(json.dumps(cantidades))
     except Exception as e:
-        print(f"Error al serializar datos para los gráficos: {str(e)}")
-        # Asignar valores por defecto en caso de error
-        horas_json = mark_safe(json.dumps([]))
+        print(f"Error al serializar datos para el gráfico: {str(e)}")
+        etiquetas_json = mark_safe(json.dumps([], ensure_ascii=False))
         cantidades_json = mark_safe(json.dumps([]))
-        meses_etiquetas_json = mark_safe(json.dumps([], ensure_ascii=False))
-        cantidades_mes_json = mark_safe(json.dumps([]))
     
+    # Preparar el contexto para la plantilla
     context = {
         'total_socios': total_socios,
         'asistencias_hoy': asistencias_hoy,
-        'horas': horas_json,
-        'cantidades': cantidades_json,
+        'etiquetas': etiquetas_json,
+        'datos': cantidades_json,
+        'titulo_grafico': titulo_grafico,
+        'tipo_eje_x': tipo_eje_x,
+        'fecha_inicio': fecha_inicio.strftime('%Y-%m-%d'),
+        'fecha_fin': fecha_fin.strftime('%Y-%m-%d'),
+        'tipo_agrupacion': tipo_agrupacion,
+        'ultimas_asistencias': ultimas_asistencias,
+        'titulo_detalle': titulo_detalle,
         'filtro': filtro,
         'grupo': grupo,
-        'titulo_detalle': titulo_detalle,
-        'socios_detalle': socios_detalle,
-        'socios_no_pago_sin_asistencia': socios_no_pago_sin_asistencia,
-        'socios_no_pago_con_asistencia': socios_no_pago_con_asistencia,
-        'socios_con_pago_sin_asistencia': socios_con_pago_sin_asistencia,
-        'socios_con_pago_con_asistencia': socios_con_pago_con_asistencia,
-        'meses_etiquetas': meses_etiquetas_json,
-        'cantidades_mes': cantidades_mes_json,
     }
+    
     return render(request, 'home.html', context)

@@ -54,6 +54,9 @@ docker cp backup_gymdb.backup gymapp-db-1:/tmp/
 docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -v /tmp/backup_gymdb.backup
 
 ## Pending Tasks - Sorted by priority
+[] [Other] [Medium] Confirmar que la aplicación soporta el cambio de precios
+[] [Other] [Easy] Reordenar como se muestran los pesos de los ejercicios
+[] [Other] [Easy] Permitir que se pueda cargar una asistencia de un momento pasado
 [] [Functional] [Easy] Agregar un ícono distintivo, cuando falta cargarle algún dato a un socio (Email, Teléfono, cumpleaños, etc)
 [] [Functional] [Easy] Armar un ranking, ordenado por cantidad de días sin venir, de usuarios pagos, que vinieron algúna vez al més
 [] [Functional] [Easy] Levantar un warning, cuando una persona, hace un més, no modifica el peso de sus ejercicios
