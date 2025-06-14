@@ -5,7 +5,22 @@
 {% block content %}
 <div class="container mt-5">
     <h2>Lista de Socios</h2>
-    <input type="text" id="busqueda-socio" class="form-control" placeholder="Buscar socio por nombre o apellido...">
+    
+    <!-- Sección de búsqueda con estilo mejorado -->
+    <div class="bg-white shadow rounded-3 p-4 mb-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <label for="busqueda-socio" class="form-label fw-bold">Buscar socio:</label>
+                <div class="input-group mb-2">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" id="busqueda-socio" class="form-control" placeholder="Ingrese nombre o apellido del socio...">
+                </div>
+                <small class="text-muted">La búsqueda se actualiza automáticamente mientras escribe</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabla de socios -->
     <div id="tabla-socios">
         {% include 'socios/tabla_socios.html' %}
     </div>
@@ -37,13 +52,8 @@
             
             // Crear nuevo timeout
             timeoutId = setTimeout(() => {
-                // Solo hacer la búsqueda si hay al menos 2 caracteres
-                if (query.length >= 2) {
-                    buscarSocios(query);
-                } else if (query.length === 0) {
-                    // Si el input está vacío, mostrar todos los socios
-                    buscarSocios('');
-                }
+                // Realizar la búsqueda con cualquier cantidad de caracteres
+                buscarSocios(query);
             }, 300); // Esperar 300ms antes de hacer la búsqueda
         });
     });

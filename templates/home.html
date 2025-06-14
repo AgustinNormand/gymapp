@@ -34,232 +34,10 @@
         </div>
     </div>
 
-    <!-- Gráfico Unificado de Asistencias -->
-    <div class="card shadow p-4 mb-5">
-        <h2 class="mb-4">Evolución Semanal</h2>
-        
-        <!-- Filtros -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <form method="get" class="row g-3 align-items-end">
-                    <!-- Mantener otros parámetros de filtrado -->
-                    <input type="hidden" name="grupo" value="{{ grupo }}">
-                    {% if request.GET.filtro %}
-                    <input type="hidden" name="filtro" value="{{ request.GET.filtro }}">
-                    {% endif %}
-                    
-                    <div class="col-md-3">
-                        <label for="tipo_agrupacion" class="form-label">Agrupar por</label>
-                        <select class="form-select" id="tipo_agrupacion" name="tipo_agrupacion" onchange="this.form.submit()">
-                            <option value="hora" {% if request.GET.tipo_agrupacion == 'hora' or not request.GET.tipo_agrupacion %}selected{% endif %}>Hora del día</option>
-                            <option value="dia" {% if request.GET.tipo_agrupacion == 'dia' %}selected{% endif %}>Día</option>
-                            <option value="semana" {% if request.GET.tipo_agrupacion == 'semana' %}selected{% endif %}>Semana</option>
-                            <option value="mes" {% if request.GET.tipo_agrupacion == 'mes' %}selected{% endif %}>Mes</option>
-                            <option value="anio" {% if request.GET.tipo_agrupacion == 'anio' %}selected{% endif %}>Año</option>
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <label for="fecha_inicio" class="form-label">Fecha de inicio</label>
-                        <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
-                               value="{{ request.GET.fecha_inicio|default:'' }}" onchange="actualizarFechas()">
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <label for="fecha_fin" class="form-label">Fecha de fin</label>
-                        <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
-                               value="{{ request.GET.fecha_fin|default:'' }}" onchange="actualizarFechas()">
-                    </div>
-                    
-                    <div class="col-md-3 d-flex">
-                        <button type="submit" class="btn btn-primary me-2 flex-grow-1">
-                            <i class="fas fa-filter"></i> Aplicar Filtros
-                        </button>
-                        <a href="?" class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="Reiniciar filtros">
-                            <i class="fas fa-sync"></i> <span class="d-none d-sm-inline">Reiniciar</span>
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
-        
-        <!-- Gráfico -->
-        <div class="chart-container" style="position: relative; height: 500px; width: 100%;">
-            <canvas id="asistenciasChart"></canvas>
-        </div>
+    <div class="text-center mt-4 mb-2">
+        <h2>Actividad mensual de Socios</h2>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-    // Función para formatear fecha a YYYY-MM-DD
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-    
-    // Función para actualizar las fechas según el tipo de agrupación
-    function actualizarFechas() {
-        const tipoAgrupacion = document.getElementById('tipo_agrupacion').value;
-        const fechaInicio = document.getElementById('fecha_inicio');
-        const fechaFin = document.getElementById('fecha_fin');
-        const hoy = new Date();
-        
-        // Si ya hay fechas seleccionadas, no hacer nada
-        if (fechaInicio.value && fechaFin.value) {
-            return;
-        }
-        
-        // Establecer fecha de fin como hoy por defecto
-        fechaFin.value = formatDate(hoy);
-        
-        // Establecer fecha de inicio según el tipo de agrupación
-        const fechaInicioDate = new Date(hoy);
-        
-        switch(tipoAgrupacion) {
-            case 'hora':
-                // Mostrar solo el día actual para agrupación por hora
-                fechaInicioDate.setDate(hoy.getDate());
-                break;
-            case 'dia':
-                // Mostrar últimos 30 días para agrupación por día
-                fechaInicioDate.setDate(hoy.getDate() - 30);
-                break;
-            case 'semana':
-                // Mostrar últimas 12 semanas para agrupación por semana
-                fechaInicioDate.setDate(hoy.getDate() - 84); // 12 semanas
-                break;
-            case 'mes':
-                // Mostrar últimos 12 meses para agrupación por mes
-                fechaInicioDate.setMonth(hoy.getMonth() - 11);
-                fechaInicioDate.setDate(1); // Primer día del mes
-                break;
-            case 'anio':
-                // Mostrar últimos 5 años para agrupación por año
-                fechaInicioDate.setFullYear(hoy.getFullYear() - 4);
-                fechaInicioDate.setMonth(0);
-                fechaInicioDate.setDate(1);
-                break;
-        }
-        
-        fechaInicio.value = formatDate(fechaInicioDate);
-    }
-    
-    // Inicializar el gráfico cuando el DOM esté listo
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Inicializando gráfico...');
-        
-        // Configurar fechas por defecto
-        actualizarFechas();
-        
-        // Obtener el contexto del canvas
-        const ctx = document.getElementById('asistenciasChart');
-        
-        if (!ctx) {
-            console.error('No se encontró el elemento canvas con ID "asistenciasChart"');
-            return;
-        }
-        
-        try {
-            // Datos del gráfico (proporcionados por Django)
-            const etiquetas = JSON.parse('{{ etiquetas|safe|escapejs }}');
-            const datos = JSON.parse('{{ datos|safe|escapejs }}');
-            const titulo = '{{ titulo_grafico|escapejs }}';
-            const tipoEjeX = '{{ tipo_eje_x|escapejs }}';
-            
-            console.log('Etiquetas:', etiquetas);
-            console.log('Datos:', datos);
-            console.log('Título:', titulo);
-            console.log('Tipo de eje X:', tipoEjeX);
-            
-            // Destruir gráfico anterior si existe
-            if (window.asistenciasChart && typeof window.asistenciasChart.destroy === 'function') {
-                window.asistenciasChart.destroy();
-                window.asistenciasChart = null;
-            }
-            
-            // Crear el gráfico
-            window.asistenciasChart = new Chart(ctx.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: etiquetas,
-                    datasets: [{
-                        label: 'Número de socios únicos',
-                        data: datos,
-                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1,
-                        barPercentage: 0.8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: titulo,
-                            font: {
-                                size: 18
-                            },
-                            padding: {
-                                top: 10,
-                                bottom: 20
-                            }
-                        },
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            callbacks: {
-                                label: function(context) {
-                                    return `Socios: ${context.parsed.y}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: tipoEjeX
-                            },
-                            grid: {
-                                display: false
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Cantidad de socios únicos'
-                            },
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1,
-                                precision: 0
-                            }
-                        }
-                    }
-                }
-            });
-        } catch (error) {
-            console.error('Error al crear el gráfico:', error);
-        }
-    });
-    
-    // Inicializar tooltips de Bootstrap
-    document.addEventListener('DOMContentLoaded', function() {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    });
-    </script>
 
-    <h2 class="mt-5">Actividad mensual de Socios</h2>
     <div class="row">
         <div class="col-md-6 col-lg-3">
             <a href="?grupo=no_pago_sin_asistencia{% if filtro %}&filtro={{ filtro }}{% endif %}" class="text-decoration-none">
@@ -433,6 +211,236 @@
         activarOrdenamiento();
     });
 </script>
+
+    <!-- Gráfico Unificado de Asistencias -->
+    <div class="mb-5">
+        <div class="text-center mt-4 mb-2">
+            <h2>Estadísticas de Asistencias</h2>
+        </div>
+        
+        <!-- Contenedor principal con filtros y gráfico -->
+        <div class="bg-white shadow rounded-3 p-4">
+            <!-- Filtros -->
+            <div class="mb-4">
+                <form method="get" class="row g-3 align-items-end">
+                    <!-- Mantener otros parámetros de filtrado -->
+                    <input type="hidden" name="grupo" value="{{ grupo }}">
+                    {% if request.GET.filtro %}
+                    <input type="hidden" name="filtro" value="{{ request.GET.filtro }}">
+                    {% endif %}
+                    
+                    <div class="col-md-3">
+                        <label for="tipo_agrupacion" class="form-label">Agrupar por</label>
+                        <select class="form-select" id="tipo_agrupacion" name="tipo_agrupacion" onchange="this.form.submit()">
+                            <option value="hora" {% if request.GET.tipo_agrupacion == 'hora' or not request.GET.tipo_agrupacion %}selected{% endif %}>Hora del día</option>
+                            <option value="dia" {% if request.GET.tipo_agrupacion == 'dia' %}selected{% endif %}>Día</option>
+                            <option value="semana" {% if request.GET.tipo_agrupacion == 'semana' %}selected{% endif %}>Semana</option>
+                            <option value="mes" {% if request.GET.tipo_agrupacion == 'mes' %}selected{% endif %}>Mes</option>
+                            <option value="anio" {% if request.GET.tipo_agrupacion == 'anio' %}selected{% endif %}>Año</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="fecha_inicio" class="form-label">Fecha de inicio</label>
+                        <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                               value="{{ request.GET.fecha_inicio|default:'' }}" onchange="actualizarFechas()">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="fecha_fin" class="form-label">Fecha de fin</label>
+                        <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
+                               value="{{ request.GET.fecha_fin|default:'' }}" onchange="actualizarFechas()">
+                    </div>
+                    
+                    <div class="col-md-3 d-flex">
+                        <button type="submit" class="btn btn-primary me-2 flex-grow-1">
+                            <i class="fas fa-filter"></i> Aplicar Filtros
+                        </button>
+                        <a href="?" class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="Reiniciar filtros">
+                            <i class="fas fa-sync"></i> <span class="d-none d-sm-inline">Reiniciar</span>
+                        </a>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Gráfico -->
+            <div class="chart-container" style="position: relative; height: 500px; width: 100%;">
+                <canvas id="asistenciasChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    // Función para formatear fecha a YYYY-MM-DD
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    
+    // Función para actualizar las fechas según el tipo de agrupación
+    function actualizarFechas() {
+        const tipoAgrupacion = document.getElementById('tipo_agrupacion').value;
+        const fechaInicio = document.getElementById('fecha_inicio');
+        const fechaFin = document.getElementById('fecha_fin');
+        const hoy = new Date();
+        
+        // Si ya hay fechas seleccionadas, no hacer nada
+        if (fechaInicio.value && fechaFin.value) {
+            return;
+        }
+        
+        // Establecer fecha de fin como hoy por defecto
+        fechaFin.value = formatDate(hoy);
+        
+        // Establecer fecha de inicio según el tipo de agrupación
+        const fechaInicioDate = new Date(hoy);
+        
+        switch(tipoAgrupacion) {
+            case 'hora':
+                // Mostrar solo el día actual para agrupación por hora
+                fechaInicioDate.setDate(hoy.getDate());
+                break;
+            case 'dia':
+                // Mostrar últimos 30 días para agrupación por día
+                fechaInicioDate.setDate(hoy.getDate() - 30);
+                break;
+            case 'semana':
+                // Mostrar últimas 12 semanas para agrupación por semana
+                fechaInicioDate.setDate(hoy.getDate() - 84); // 12 semanas
+                break;
+            case 'mes':
+                // Mostrar últimos 12 meses para agrupación por mes
+                fechaInicioDate.setMonth(hoy.getMonth() - 11);
+                fechaInicioDate.setDate(1); // Primer día del mes
+                break;
+            case 'anio':
+                // Mostrar últimos 5 años para agrupación por año
+                fechaInicioDate.setFullYear(hoy.getFullYear() - 4);
+                fechaInicioDate.setMonth(0);
+                fechaInicioDate.setDate(1);
+                break;
+        }
+        
+        fechaInicio.value = formatDate(fechaInicioDate);
+    }
+    
+    // Inicializar el gráfico cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Inicializando gráfico...');
+        
+        // Configurar fechas por defecto
+        actualizarFechas();
+        
+        // Obtener el contexto del canvas
+        const ctx = document.getElementById('asistenciasChart');
+        
+        if (!ctx) {
+            console.error('No se encontró el elemento canvas con ID "asistenciasChart"');
+            return;
+        }
+        
+        try {
+            // Datos del gráfico (proporcionados por Django)
+            const etiquetas = JSON.parse('{{ etiquetas|safe|escapejs }}');
+            const datos = JSON.parse('{{ datos|safe|escapejs }}');
+            const titulo = '{{ titulo_grafico|escapejs }}';
+            const tipoEjeX = '{{ tipo_eje_x|escapejs }}';
+            
+            console.log('Etiquetas:', etiquetas);
+            console.log('Datos:', datos);
+            console.log('Título:', titulo);
+            console.log('Tipo de eje X:', tipoEjeX);
+            
+            // Destruir gráfico anterior si existe
+            if (window.asistenciasChart && typeof window.asistenciasChart.destroy === 'function') {
+                window.asistenciasChart.destroy();
+                window.asistenciasChart = null;
+            }
+            
+            // Crear el gráfico
+            window.asistenciasChart = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        label: 'Número de socios únicos',
+                        data: datos,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        barPercentage: 0.8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: titulo,
+                            font: {
+                                size: 18
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            }
+                        },
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Socios: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: tipoEjeX
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Cantidad de socios únicos'
+                            },
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error al crear el gráfico:', error);
+        }
+    });
+    
+    // Inicializar tooltips de Bootstrap
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+    </script>
+
+    
 
 </div>
 {% endblock %}

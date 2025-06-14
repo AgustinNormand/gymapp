@@ -4,28 +4,32 @@
 <div class="container mt-5">
     <h2>Asistencias Registradas</h2>
 
-    <!-- Formulario de filtros -->
-    <form method="get" class="row mb-4">
-        <div class="col-md-3">
-            <label>Desde:</label>
-            <input type="date" name="fecha_desde" value="{{ fecha_desde }}" class="form-control">
-        </div>
-        <div class="col-md-3">
-            <label>Hasta:</label>
-            <input type="date" name="fecha_hasta" value="{{ fecha_hasta }}" class="form-control">
-        </div>
-        <div class="col-md-3">
-            <label>Socio:</label>
-            <input type="text" name="socio" value="{{ socio }}" class="form-control" placeholder="Buscar socio...">
-        </div>
-        <div class="col-md-3 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary me-2">Filtrar</button>
-            <a href="{% url 'listar_entradas' %}" class="btn btn-secondary">Limpiar</a>
-        </div>
-    </form>
-
-    <!-- Tabla de resultados -->
-    <table class="table table-striped">
+    <!-- Contenedor principal para alinear ambos elementos -->
+    <div class="table-responsive">
+        <!-- Formulario de filtros -->
+        <form method="get" class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Desde:</label>
+                    <input type="date" name="fecha_desde" value="{{ fecha_desde }}" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Hasta:</label>
+                    <input type="date" name="fecha_hasta" value="{{ fecha_hasta }}" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Socio:</label>
+                    <input type="text" name="socio" value="{{ socio }}" class="form-control" placeholder="Buscar socio...">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                    <a href="{% url 'listar_entradas' %}" class="btn btn-secondary">Limpiar</a>
+                </div>
+            </div>
+        </form>
+        
+        <!-- Tabla de resultados -->
+        <table class="table table-striped">
         <thead>
             <tr>
                 <th>Socio</th>
@@ -78,6 +82,7 @@
                 </tr>
             {% endfor %}
         </tbody>
-    </table>
+        </table>
+    </div>
 </div>
 {% endblock %}

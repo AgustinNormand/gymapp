@@ -36,7 +36,24 @@
     {% endif %}
     {% endwith %}
 
-    <div class="table-responsive">
+    
+    
+
+    <div class="card mb-4">
+        <div class="card-body p-0">
+            <div class="d-flex justify-content-between mb-0 pb-0 px-3 pt-3" id="controles-tabla">
+                <div id="length-control">Mostrar <select id="length-select" class="form-select form-select-sm d-inline-block" style="min-width: 80px; width: auto;">
+                    <option value="10">10</option>
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="-1">Todos</option>
+                </select> registros</div>
+                <div id="search-control">
+                    <label>Buscar: <input type="search" id="search-input" class="form-control form-control-sm d-inline-block" style="width: auto;"></label>
+                </div>
+            </div>
+            <div class="table-responsive mt-0 pt-0">
         <table class="table table-striped table-hover" id="tablaEstadisticas">
             <thead class="table-dark">
                 <tr>
@@ -57,7 +74,13 @@
                             {{ estadistica.socio.apellido }}, {{ estadistica.socio.nombre }}
                         </a>
                     </td>
-                    <td>{% if estadistica.modalidad_mes_anterior %}{{ estadistica.modalidad_mes_anterior.nombre }}{% else %}Sin datos{% endif %}</td>
+                    <td>{% if estadistica.modalidad_mes_anterior %}
+                            {{ estadistica.modalidad_mes_anterior.nombre }}
+                            <small class="d-block text-muted">({{ estadistica.modalidad_mes_anterior.dias_por_semana }} días/sem)</small>
+                        {% else %}
+                            Sin datos
+                        {% endif %}
+                    </td>
                     <td class="text-center">
                         <span class="badge {% if estadistica.promedio_semanal_anterior > 0 %}bg-info text-dark{% else %}bg-light text-dark{% endif %}">
                             {{ estadistica.promedio_semanal_anterior }}
@@ -103,6 +126,8 @@
                 {% endfor %}
             </tbody>
         </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -111,6 +136,64 @@
 
 {% block extra_css %}
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css"/>
+<style>
+    /* Hacer el dropdown de selección de registros más ancho */
+    .dataTables_length select {
+        min-width: 80px !important;
+    }
+    
+    /* Eliminar TODOS los márgenes y padding de Bootstrap */
+    .row {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Eliminar TODOS los márgenes y padding de DataTables */
+    .dataTables_wrapper div {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Posicionar los controles correctamente */
+    .dataTables_wrapper .dataTables_length {
+        float: left !important;
+        margin-bottom: 0 !important;
+    }
+    
+    .dataTables_wrapper .dataTables_filter {
+        float: right !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Eliminar espacio superior de la tabla */
+    .dataTables_wrapper table.dataTable {
+        margin-top: 0 !important;
+        border-top: 0 !important;
+    }
+    
+    /* Ajustes para la paginación e info */
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        margin-top: 8px !important;
+    }
+    
+    /* Forzar clearfix */
+    .dataTables_wrapper::after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    
+    /* Atacar directamente el espacio entre los controles y la tabla */
+    .dataTables_wrapper > .row:first-child {
+        margin-bottom: -20px !important; /* Valor negativo mayor para compensar el espacio */
+    }
+    
+    /* Eliminar espacio entre filas */
+    .dataTables_wrapper > .row + .row {
+        margin-top: 0 !important;
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -130,12 +213,32 @@
             };
             
             // Inicializar DataTable
-            $('#tablaEstadisticas').DataTable({
+            var tabla = $('#tablaEstadisticas').DataTable({
                 "pageLength": 25,
                 "order": [[0, "asc"]],
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json"
                 },
+                "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+                "dom": 'tip', // Solo tabla, info y paginación (sin controles)
+                "drawCallback": function() {
+                    // Ocultar los controles originales de DataTables
+                    $('.dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter').hide();
+                },
+                "initComplete": function(settings, json) {
+                    // Ocultar los controles originales de DataTables
+                    $('.dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter').hide();
+                    
+                    // Conectar nuestros controles personalizados
+                    $('#length-select').on('change', function() {
+                        tabla.page.len($(this).val()).draw();
+                    });
+                    
+                    $('#search-input').on('keyup', function() {
+                        tabla.search($(this).val()).draw();
+                    });
+                },
+
                 "columnDefs": [
                     // Columna Socio
                     { 
@@ -207,6 +310,8 @@
                     }
                 ]
             });
+            
+
         }
     });
 </script>
