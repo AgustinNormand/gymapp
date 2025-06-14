@@ -6,27 +6,36 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Socio</th>
-                <th>Monto</th>
-                <th>Fecha de Pago</th>
-                <th>Fecha de Vencimiento</th>
-                <th>Acciones</th>
+                <th class="text-center">Socio</th>
+                <th class="text-center">Monto</th>
+                <th class="text-center">Fecha de Pago</th>
+                <th class="text-center">Fecha de Vencimiento</th>
+                <th class="text-center">Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for pago in pagos %}
                 <tr>
-                    <td>{{ pago.socio.nombre }} {{ pago.socio.apellido }}
+                    <td class="text-center">{{ pago.socio.nombre }} {{ pago.socio.apellido }}
                         {% if not socio.has_all_data %}
                             <i class="bi bi-info-circle-fill text-warning ms-1" title="Faltan datos opcionales"></i>
                         {% endif %}
                     </td>
-                    <td>${{ pago.monto }}</td>
-                    <td>{{ pago.fecha_pago|date:"d/m/Y" }}</td>
-                    <td>{{ pago.fecha_vencimiento|date:"d/m/Y" }}</td>
-                    <td>
-                        <a href="{% url 'pagos:eliminar_pago' pago.id %}" class="btn btn-sm btn-danger">
-                            <i class="bi bi-trash"></i> Eliminar
+                    <td class="text-center">${{ pago.monto }}</td>
+                    <td class="text-center">{{ pago.fecha_pago|date:"d/m/Y" }}</td>
+                    <td class="text-center">{{ pago.fecha_vencimiento|date:"d/m/Y" }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'socios:detalle_socio' pago.socio.id %}" 
+                           class="text-info text-decoration-none" title="Ver detalle del socio">
+                            <i class="bi bi-person-lines-fill"></i>
+                        </a>
+                        <a href="{% url 'socios:editar_socio' pago.socio.id %}" 
+                           class="ms-1 text-decoration-none" title="Editar socio">
+                            <i class="bi bi-pencil-fill text-primary"></i>
+                        </a>
+                        <a href="{% url 'pagos:eliminar_pago' pago.id %}" 
+                           class="ms-1 text-danger text-decoration-none" title="Eliminar pago">
+                            <i class="bi bi-x-circle-fill"></i>
                         </a>
                     </td>
                 </tr>
