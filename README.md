@@ -54,17 +54,20 @@ docker cp backup_gymdb.backup gymapp-db-1:/tmp/
 docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -v /tmp/backup_gymdb.backup
 
 ## Pending Tasks - Sorted by priority
-[] [Other] [Medium] Confirmar que la aplicación soporta el cambio de precios
+[] [Other] [Easy] Mostrar los cumpleaños de la semana. Cuando se pasa la asistencia de alguien que es el cumpleaños, mostrar una animación
+[] [Other] [Easy] Impedir registrar mas de una asistencia, en una misma hora, para un socio
+[] [Other] [Easy] Estandarizar los estilos de las tablas y el ordenamiento a lo largo de la app
+[] [Other] [Easy] Estandarizar los estilos de las acciones, a lo largo de la app
+[] [Other] [Easy] En la vista de "Asistencais Registradas" centrar el contenido de la tabla. 
+[] [Other] [Easy] En la vista de "Asistencais Registradas" que el titulo no esté mas a la izquierda de la tabla
 [] [Other] [Easy] Reordenar como se muestran los pesos de los ejercicios
+[] [Other] [Easy] Acomodar la vista de "Detalle de Socio"
+[] [Other] [Easy] Revisar los formularios de "Gestionar Ejercicios", "Gestionar Pagos" ...
+
 [] [Other] [Easy] Permitir que se pueda cargar una asistencia de un momento pasado
-[] [Functional] [Easy] Agregar un ícono distintivo, cuando falta cargarle algún dato a un socio (Email, Teléfono, cumpleaños, etc)
-[] [Functional] [Easy] Armar un ranking, ordenado por cantidad de días sin venir, de usuarios pagos, que vinieron algúna vez al més
 [] [Functional] [Easy] Levantar un warning, cuando una persona, hace un més, no modifica el peso de sus ejercicios
-[] [Infra] [Easy] Make another backup of postgres information, to avoid SPOF
-[] [Other] [Easy] Agregar un tooltip a las acciones, para que quede claro que hace cada una
-[] [Dash] [Easy] Agregar gráficos de cantidad de usuarios mensuales
-[] [Dash] [Easy] Agregar gráfico de la evolución de los pesos de un socio
-[] [Dash] [Easy] Agregar gráfico de las asistencias semanales de los socios
+
+[] [Other] [Hard] Eliminar los casos donde se cambió la modalidad de un socio, a la misma modalidad
 [] [Functional] [Medium] Ver de crear distintos usuarios, con roles diferentes, para los distintos profes
 [] [Infra] [Medium] Add volume to Postgres to save information
 [] [Infra] [Medium] Add Nginx to production scope
