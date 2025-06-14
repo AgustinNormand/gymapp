@@ -6,6 +6,7 @@ from modalidades.models import HistorialModalidad
 from calendar import monthrange
 from datetime import date
 from django.contrib import messages
+from django.urls import reverse
 
 ############ ABM de Pagos ############
 
@@ -87,7 +88,6 @@ def alta_pago(request):
         'monto_sugerido': monto_sugerido,
     })
 
-# No es posible eliminar un pago si ya fue registrado
 # No es posible modificar un pago si ya fue registrado
 
 ############ Otros métodos ############
@@ -100,3 +100,20 @@ def listar_pagos(request):
     pagos = Pago.objects.select_related('socio').order_by('-fecha_pago')
     
     return render(request, 'pagos/listar_pagos.html', {'pagos': pagos})
+
+
+def eliminar_pago(request, pago_id):
+    # Este método se encarga de eliminar un pago registrado en el sistema.
+    # Se espera que el ID del pago se pase como un parámetro en la URL.
+    # Si el pago no existe, se lanza un error 404.
+    # Si la solicitud es POST, se elimina el pago y se redirige a la lista de pagos.
+    # Si la solicitud no es POST, se muestra una página de confirmación.
+    
+    pago = get_object_or_404(Pago, id=pago_id)
+    
+    if request.method == 'POST':
+        pago.delete()
+        messages.success(request, f"Pago de {pago.socio.nombre} {pago.socio.apellido} eliminado correctamente.")
+        return redirect('pagos:listar_pagos')
+    
+    return render(request, 'pagos/confirmar_eliminar_pago.html', {'pago': pago})

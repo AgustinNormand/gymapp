@@ -10,6 +10,7 @@
                 <th>Monto</th>
                 <th>Fecha de Pago</th>
                 <th>Fecha de Vencimiento</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -23,10 +24,15 @@
                     <td>${{ pago.monto }}</td>
                     <td>{{ pago.fecha_pago|date:"d/m/Y" }}</td>
                     <td>{{ pago.fecha_vencimiento|date:"d/m/Y" }}</td>
+                    <td>
+                        <a href="{% url 'pagos:eliminar_pago' pago.id %}" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </a>
+                    </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4">No hay pagos registrados aún.</td>
+                    <td colspan="5">No hay pagos registrados aún.</td>
                 </tr>
             {% endfor %}
         </tbody>
