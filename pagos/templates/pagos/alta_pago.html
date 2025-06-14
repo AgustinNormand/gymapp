@@ -9,12 +9,18 @@
             <h5 class="card-title">Datos del Socio</h5>
             <p><strong>Socio:</strong> {{ socio.nombre }} {{ socio.apellido }}</p>
             <p><strong>Modalidad actual:</strong> 
-              {{ modalidad_actual.modalidad.nombre }}
+              {{ modalidad_actual.nombre }}
               <a href="{% url 'modalidades:cambiar_modalidad' socio.id %}" class="ms-1 text-decoration-none" title="Cambiar modalidad">
                 <i class="bi bi-person-badge text-primary"></i>
               </a>
             </p>
-            <p><strong>Monto sugerido:</strong> ${{ monto_sugerido }}</p>
+            <p><strong>Precio actual de la modalidad:</strong> ${{ monto_sugerido }}</p>
+            {% if historial_modalidad and historial_modalidad.precio_en_el_momento != monto_sugerido %}
+            <div class="alert alert-info" role="alert">
+              <i class="bi bi-info-circle"></i> El precio ha cambiado desde la última asignación. 
+              Precio anterior: ${{ historial_modalidad.precio_en_el_momento }}
+            </div>
+            {% endif %}
         </div>
     </div>
 

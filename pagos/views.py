@@ -28,16 +28,19 @@ def alta_pago(request):
     socio = get_object_or_404(Socio, id=socio_id)
 
 
-    modalidad_actual = socio.modalidad_actual()
+    historial_modalidad = socio.modalidad_actual()
 
-    if modalidad_actual:
-        monto_sugerido = modalidad_actual.precio_en_el_momento
+    if historial_modalidad:
+        # Usamos el precio actual de la modalidad, no el guardado en el historial
+        modalidad_actual = historial_modalidad.modalidad
+        monto_sugerido = modalidad_actual.precio
     else:
         messages.warning(request, "El socio no tiene una modalidad activa asignada. Asigne una modalidad, antes de registrar el pago.")
         return redirect('modalidades:cambiar_modalidad', socio_id=socio.id)
 
     hoy = date.today()
     ultimo_dia_mes = date(hoy.year, hoy.month, monthrange(hoy.year, hoy.month)[1])
+    # Aseguramos que la fecha esté en formato ISO (yyyy-MM-dd) para el input type="date"
 
     if request.method == 'POST':
         form = PagoForm(request.POST)
@@ -46,12 +49,30 @@ def alta_pago(request):
             pago.socio = socio
             pago.monto = monto_sugerido
             pago.save()
+            
+            # Actualizamos el historial de modalidad con el precio actual
+            if historial_modalidad:
+                # Cerramos el historial anterior
+                historial_modalidad.fecha_fin = date.today()
+                historial_modalidad.save()
+                
+                # Creamos un nuevo historial con el precio actual
+                HistorialModalidad.objects.create(
+                    socio=socio,
+                    modalidad=modalidad_actual,
+                    precio_en_el_momento=modalidad_actual.precio,
+                    fecha_inicio=date.today(),
+                    fecha_fin=None
+                )
 
             messages.success(request, f"Pago registrado correctamente para {socio.nombre} {socio.apellido}.")
             return redirect('pagos:listar_pagos')
     else:
+        # Formateamos la fecha en formato ISO (yyyy-MM-dd) para el input type="date"
+        ultimo_dia_mes_iso = ultimo_dia_mes.isoformat()
+        
         initial_data = {
-            'fecha_vencimiento': ultimo_dia_mes,
+            'fecha_vencimiento': ultimo_dia_mes_iso,
             'socio': socio.id if socio else None,
             'monto': monto_sugerido,
         }
@@ -62,6 +83,7 @@ def alta_pago(request):
         'form': form,
         'socio': socio,
         'modalidad_actual': modalidad_actual,
+        'historial_modalidad': historial_modalidad,
         'monto_sugerido': monto_sugerido,
     })
 

@@ -9,7 +9,7 @@ class PagoForm(forms.ModelForm):
         widgets = {
             'socio': forms.Select(attrs={'class': 'form-control-plaintext', 'readonly': 'readonly'}),
             'monto': forms.NumberInput(attrs={'class': 'form-control-plaintext', 'readonly': 'readonly'}),
-            'fecha_vencimiento': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'fecha_vencimiento': forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'format': 'yyyy-mm-dd'}),
         }
 
     def clean_fecha_vencimiento(self):
