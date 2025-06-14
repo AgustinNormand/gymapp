@@ -3,6 +3,7 @@ from socios.models import Socio
 from registros.models import RegistroEntrada
 from pagos.models import Pago
 from datetime import date, datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from django.db.models.functions import ExtractHour, ExtractMonth, ExtractYear
 from django.db.models import Count, Q, F
 from django.utils.timezone import now
@@ -226,6 +227,94 @@ def home(request):
         etiquetas_json = mark_safe(json.dumps([], ensure_ascii=False))
         cantidades_json = mark_safe(json.dumps([]))
     
+    # Calcular datos para la sección "Actividad mensual de Socios"
+    mes_actual = date.today().replace(day=1)
+    mes_siguiente = (mes_actual.replace(day=28) + timedelta(days=4)).replace(day=1)
+    
+    # Obtener todos los socios activos
+    socios_activos = Socio.objects.all()
+    
+    # Calcular socios con pago vigente para el mes actual
+    # Un pago está vigente si su fecha de vencimiento es igual o posterior a la fecha actual
+    fecha_actual = date.today()
+    socios_con_pago = set(Pago.objects.filter(
+        fecha_vencimiento__gte=fecha_actual
+    ).values_list('socio_id', flat=True))
+    
+    # Calcular socios con asistencia en el mes actual
+    socios_con_asistencia = set(RegistroEntrada.objects.filter(
+        fecha_hora__gte=mes_actual, 
+        fecha_hora__lt=mes_siguiente
+    ).values_list('socio_id', flat=True))
+    
+    # Inicializar listas para cada categoría
+    socios_no_pago_sin_asistencia = 0
+    socios_no_pago_con_asistencia = 0
+    socios_con_pago_sin_asistencia = 0
+    socios_con_pago_con_asistencia = 0
+    socios_detalle = []
+    titulo_detalle = "Últimas asistencias"
+    
+    # Contar socios en cada categoría
+    for socio in socios_activos:
+        tiene_pago = socio.id in socios_con_pago
+        tiene_asistencia = socio.id in socios_con_asistencia
+        
+        if not tiene_pago and not tiene_asistencia:
+            socios_no_pago_sin_asistencia += 1
+        elif not tiene_pago and tiene_asistencia:
+            socios_no_pago_con_asistencia += 1
+        elif tiene_pago and not tiene_asistencia:
+            socios_con_pago_sin_asistencia += 1
+        else:  # tiene_pago and tiene_asistencia
+            socios_con_pago_con_asistencia += 1
+    
+    # Si se ha seleccionado un grupo, filtrar los socios correspondientes
+    if grupo:
+        # Determinar qué socios mostrar según el grupo seleccionado
+        if grupo == 'no_pago_sin_asistencia':
+            titulo_detalle = "No pago, sin asistencias"
+            socios_filtrados = [s for s in socios_activos if s.id not in socios_con_pago and s.id not in socios_con_asistencia]
+        elif grupo == 'no_pago_con_asistencia':
+            titulo_detalle = "No pago, con asistencias"
+            socios_filtrados = [s for s in socios_activos if s.id not in socios_con_pago and s.id in socios_con_asistencia]
+        elif grupo == 'pago_sin_asistencia':
+            titulo_detalle = "Pago, sin asistencias"
+            socios_filtrados = [s for s in socios_activos if s.id in socios_con_pago and s.id not in socios_con_asistencia]
+        elif grupo == 'pago_con_asistencia':
+            titulo_detalle = "Pago, con asistencias"
+            socios_filtrados = [s for s in socios_activos if s.id in socios_con_pago and s.id in socios_con_asistencia]
+        else:
+            socios_filtrados = []
+        
+        # Calcular días sin asistir para cada socio
+        for socio in socios_filtrados:
+            # Obtener la última asistencia del socio
+            ultima_asistencia = RegistroEntrada.objects.filter(socio=socio).order_by('-fecha_hora').first()
+            dias_sin_asistir = 0
+            if ultima_asistencia:
+                dias_sin_asistir = (date.today() - ultima_asistencia.fecha_hora.date()).days
+            
+            # Verificar si el socio tiene todos los datos opcionales
+            has_all_data = bool(socio.telefono and socio.email and socio.fecha_nacimiento)
+            
+            # Añadir socio a la lista con información adicional
+            socios_detalle.append({
+                'id': socio.id,
+                'nombre': socio.nombre,
+                'apellido': socio.apellido,
+                'telefono': socio.telefono,
+                'dias_sin_asistir': dias_sin_asistir,
+                'has_all_data': has_all_data
+            })
+        
+        # Si hay un filtro, aplicarlo también a los socios detalle
+        if filtro:
+            socios_detalle = [s for s in socios_detalle if 
+                              filtro.lower() in s['nombre'].lower() or 
+                              filtro.lower() in s['apellido'].lower()]
+            titulo_detalle += f" - Filtro: {filtro}"
+    
     # Preparar el contexto para la plantilla
     context = {
         'total_socios': total_socios,
@@ -241,6 +330,11 @@ def home(request):
         'titulo_detalle': titulo_detalle,
         'filtro': filtro,
         'grupo': grupo,
+        'socios_no_pago_sin_asistencia': socios_no_pago_sin_asistencia,
+        'socios_no_pago_con_asistencia': socios_no_pago_con_asistencia,
+        'socios_con_pago_sin_asistencia': socios_con_pago_sin_asistencia,
+        'socios_con_pago_con_asistencia': socios_con_pago_con_asistencia,
+        'socios_detalle': socios_detalle
     }
     
     return render(request, 'home.html', context)
