@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Estadísticas de Asistencias{% endblock %}
+{% block title %}Evolución Semanal{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h1>Estadísticas de Asistencias</h1>
+    <h1>Evolución Semanal</h1>
     
     <div class="card mb-4">
         <div class="card-header">
@@ -123,7 +123,9 @@
             // Función para extraer el valor numérico de las celdas con badges
             jQuery.fn.dataTable.ext.type.search.badge = function(data) {
                 // Extraer el número del contenido del span
-                var num = parseFloat($(data).text().trim());
+                var text = $(data).text().trim();
+                // Reemplazar comas por puntos para el parsing correcto
+                var num = parseFloat(text.replace(',', '.'));
                 return isNaN(num) ? '' : num.toString();
             };
             
@@ -160,7 +162,9 @@
                                 return data;
                             }
                             // Para ordenar y buscar, devolver solo el número
-                            return parseFloat($(data).text().trim()) || 0;
+                            var text = $(data).text().trim();
+                            // Reemplazar comas por puntos para el parsing correcto
+                            return parseFloat(text.replace(',', '.')) || 0;
                         }
                     },
                     // Columna Modalidad actual
@@ -177,7 +181,9 @@
                                 return data;
                             }
                             // Para ordenar y buscar, devolver solo el número
-                            return parseFloat($(data).text().trim()) || 0;
+                            var text = $(data).text().trim();
+                            // Reemplazar comas por puntos para el parsing correcto
+                            return parseFloat(text.replace(',', '.')) || 0;
                         }
                     },
                     // Columna Diferencia (badge)
@@ -189,7 +195,9 @@
                                 return data;
                             }
                             // Para ordenar y buscar, devolver solo el número
-                            return parseFloat($(data).text().trim()) || 0;
+                            var text = $(data).text().trim();
+                            // Reemplazar comas por puntos para el parsing correcto
+                            return parseFloat(text.replace(',', '.')) || 0;
                         }
                     },
                     // Columna Recomendación

@@ -18,7 +18,7 @@ from django.utils.timezone import now
 from decimal import Decimal
 
 
-def estadisticas_asistencias(request):
+def evolucion_semanal(request):
     # Obtener el mes actual y el anterior
     hoy = now().date()
     primer_dia_mes_actual = hoy.replace(day=1)
@@ -136,7 +136,7 @@ def estadisticas_asistencias(request):
     mes_actual_str = f"{meses_espanol[primer_dia_mes_actual.month]} {primer_dia_mes_actual.year}"
     mes_anterior_str = f"{meses_espanol[primer_dia_mes_anterior.month]} {primer_dia_mes_anterior.year}"
     
-    return render(request, 'registros/estadisticas_asistencias.html', {
+    return render(request, 'registros/evolucion_semanal.html', {
         'estadisticas': estadisticas,
         'mes_actual': mes_actual_str,
         'mes_anterior': mes_anterior_str,

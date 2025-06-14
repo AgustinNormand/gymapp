@@ -6,5 +6,5 @@ urlpatterns = [
     path('registrar/', views.registrar_entrada, name='registrar_entrada'),
     path('alta_entrada/', views.alta_entrada, name='alta_entrada'),
     path('entrada/<int:id>/eliminar/', views.eliminar_entrada, name='eliminar_entrada'),
-    path('estadisticas/', views.estadisticas_asistencias, name='estadisticas_asistencias'),
+    path('evolucion-semanal/', views.evolucion_semanal, name='evolucion_semanal'),
 ]
