@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const pesos = registrosEjercicio.map(registro => registro.peso);
         
         // Crear el gráfico
-        const ctx = document.getElementById('registroEjercicioChart').getContext('2d');
+        const ctx = document.getElementById('pesoChart').getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: {

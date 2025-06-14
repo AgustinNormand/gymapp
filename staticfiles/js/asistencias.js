@@ -3,12 +3,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const tablaAsistencias = document.getElementById('tablaAsistencias');
     if (tablaAsistencias) {
         $('#tablaAsistencias').DataTable({
-            order: [[0, 'desc']], // Ordenar por fecha descendente por defecto
+            order: [[0, 'desc']], // Ordenar por la primera columna (fecha) de forma descendente
             language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+                search: 'Buscar:',
+                paginate: {
+                    first: 'Primero',
+                    last: 'Último',
+                    next: 'Siguiente',
+                    previous: 'Anterior'
+                },
+                lengthMenu: 'Mostrar _MENU_ registros por página',
+                info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+                infoEmpty: 'No hay registros disponibles',
+                infoFiltered: '(filtrado de _MAX_ registros en total)'
             },
             pageLength: 10,
-            responsive: true
+            responsive: true,
+            stateSave: true, // Guardar el estado de ordenación, búsqueda y paginación
+            columnDefs: [
+                { type: 'date', targets: 0 } // Especificar que la primera columna contiene fechas para ordenación correcta
+            ]
         });
     }
 
