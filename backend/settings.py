@@ -122,13 +122,34 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-AR'  # Código de idioma para español de Argentina
 
 TIME_ZONE = 'America/Argentina/Buenos_Aires'
 
 USE_I18N = True
 
+USE_L10N = True  # Habilita la localización de formatos de fecha, hora y números
+
 USE_TZ = True
+
+# Configuración de formatos de fecha y hora
+DATE_FORMAT = 'd/m/Y'
+DATETIME_FORMAT = 'd/m/Y H:i'
+TIME_FORMAT = 'H:i'
+
+# Configuración de localización
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
+
+# Idiomas soportados
+LANGUAGES = [
+    ('es', 'Español'),
+    ('en', 'English'),
+]
+
+# Middleware para detectar el idioma del navegador
+MIDDLEWARE.insert(1, 'django.middleware.locale.LocaleMiddleware')
 
 
 # Static files (CSS, JavaScript, Images)

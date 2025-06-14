@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load i18n l10n static %}
+
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
@@ -90,22 +92,118 @@
         </tbody>
     </table>
 
-    <h3>Historial de Asistencias</h3>
-
+    <h3 class="mt-4 mb-3">Historial de Asistencias</h3>
+    
     {% if asistencias %}
-        <ul class="list-group mb-4">
-            {% for asistencia in asistencias %}
-                <li class="list-group-item">
-                    {{ asistencia.fecha_hora|date:"d/m/Y H:i" }}
-                </li>
-            {% endfor %}
-        </ul>
+        <!-- Resumen Estadístico -->
+        <div class="row mb-4 g-3">
+            <!-- Tarjeta de Total de Asistencias -->
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="d-flex align-items-center justify-content-center mb-2">
+                            <i class="fas fa-calendar-check fa-2x text-primary me-3"></i>
+                            <div>
+                                <h2 class="mb-0 fw-bold">{{ asistencias|length }}</h2>
+                                <p class="text-muted mb-0 small">Total de asistencias</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tarjeta de Promedio Semanal -->
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="d-flex align-items-center justify-content-center mb-2">
+                            <i class="fas fa-chart-line fa-2x text-success me-3"></i>
+                            <div>
+                                <h2 class="mb-0 fw-bold">
+                                    {% if promedio_semanal is not None %}
+                                        {{ promedio_semanal }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </h2>
+                                <p class="text-muted mb-0 small">Promedio semanal</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tarjeta de Último Mes -->
+            <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="d-flex align-items-center justify-content-center mb-2">
+                            <i class="fas fa-calendar-week fa-2x text-info me-3"></i>
+                            <div>
+                                <h2 class="mb-0 fw-bold">
+                                    {{ asistencias_ultimo_mes|default:"0" }}
+                                </h2>
+                                <p class="text-muted mb-0 small">Últimos 30 días</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Gráfico de Asistencias por Mes -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2 text-primary"></i>
+                            Asistencias por Mes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div style="height: 300px;">
+                            <canvas id="asistenciasChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Asistencias -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Registro de Asistencias</h5>
+                <small class="text-muted">{{ asistencias|length }} registros encontrados</small>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="tablaAsistencias" class="table table-striped" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Día de la Semana</th>
+                                <th>Hora del Día</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for asistencia in asistencias %}
+                            <tr>
+                                <td>{{ asistencia.fecha_hora|date:"d/m/Y H:i" }}</td>
+                                <td>{% language 'es' %}{{ asistencia.fecha_hora|date:"l" }}{% endlanguage %}</td>
+                                <td>{{ asistencia.fecha_hora|time:"H:i" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     {% else %}
-        <p>No hay asistencias registradas.</p>
+        <div class="alert alert-info">No hay asistencias registradas para este socio.</div>
     {% endif %}
 
-
-    <h3>Historial de Observaciones</h3>
+    <h3 class="mt-4">Historial de Observaciones</h3>
 
     {% if observaciones %}
         <ul class="list-group mb-4">
@@ -144,7 +242,7 @@
 
     {% if registros_ejercicio %}
         <div class="row mt-4">
-            {% if registros_ejercicio %}
+            {% if registros_ejercicio|length > 1 %}
                 <div class="col-md-8">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
@@ -161,7 +259,7 @@
             {% else %}
                 <div class="col-12 mb-4">
                     <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Se necesita más de un registro para mostrar el gráfico de evolución.
+                        <i class="fas fa-info-circle"></i> Se necesita al menos un registro más para mostrar el gráfico de evolución del peso.
                     </div>
                 </div>
             {% endif %}
@@ -204,113 +302,27 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Incluir el archivo JavaScript externo -->
+<script src="{% static 'js/asistencias.js' %}"></script>
+
+<!-- Pasar las fechas de asistencias al script -->
+<div id="asistencias-data" style="display: none;">
+    {% for asistencia in asistencias %}
+    <span class="fecha-asistencia">{{ asistencia.fecha_hora|date:"Y-m-d H:i:s" }}</span>
+    {% endfor %}
+</div>
+
 {% if registros_ejercicio %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Inicializando gráfico...');
-    
-    // 1. Obtener los datos de Django
-    const registrosEjercicio = [
-        {% for registro in registros_ejercicio|dictsort:"fecha" %}
-            {
-                fecha: '{{ registro.fecha|date:"d/m/Y" }}',
-                peso: parseFloat({{ registro.peso|stringformat:".1f" }})
-            }{% if not forloop.last %},{% endif %}
-        {% endfor %}
-    ];
-    
-    // Si solo hay un registro, lo duplicamos para poder mostrar el gráfico
-    if (registrosEjercicio.length === 1) {
-        const unicoRegistro = registrosEjercicio[0];
-        registrosEjercicio.push({
-            ...unicoRegistro,
-            // Usamos la misma fecha para el segundo punto
-            fecha: unicoRegistro.fecha
-        });
-    }
-    
-    // 2. Preparar datos para el gráfico
-    const fechas = registrosEjercicio.map(r => r.fecha);
-    const pesos = registrosEjercicio.map(r => r.peso);
-    
-    console.log('Datos del gráfico:', { fechas, pesos });
-    
-    // 3. Obtener el contexto del canvas
-    const ctx = document.getElementById('pesoChart').getContext('2d');
-    if (!ctx) {
-        console.error('No se pudo obtener el contexto del canvas');
-        return;
-    }
-    
-    // 4. Crear el gráfico con los datos reales
-    try {
-        console.log('Creando gráfico con datos reales...');
-        
-        const myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: fechas,
-                datasets: [{
-                    label: 'Peso (kg)',
-                    data: pesos,
-                    borderColor: 'rgb(78, 115, 223)',
-                    backgroundColor: 'rgba(78, 115, 223, 0.1)',
-                    borderWidth: 2,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#4e73df',
-                    pointBorderColor: '#fff',
-                    pointHoverRadius: 5,
-                    pointHoverBackgroundColor: '#2e59d9',
-                    pointHoverBorderColor: '#fff',
-                    pointHitRadius: 10,
-                    pointBorderWidth: 2,
-                    tension: 0.3,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        title: {
-                            display: true,
-                            text: 'Peso (kg)'
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return value + ' kg';
-                            }
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Fecha'
-                        }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `Peso: ${context.parsed.y} kg`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        
-        console.log('Gráfico creado exitosamente');
-        
-    } catch (error) {
-        console.error('Error al crear el gráfico:', error);
-    }
-});
-</script>
+<!-- Pasar los datos de registros de ejercicio al script -->
+<div id="registros-ejercicio-data" style="display: none;">
+    {% for registro in registros_ejercicio|dictsort:"fecha" %}
+    <div class="registro-ejercicio" 
+         data-fecha="{{ registro.fecha|date:'d/m/Y' }}" 
+         data-peso="{{ registro.peso|stringformat:'.1f' }}"></div>
+    {% endfor %}
+</div>
+
+<!-- Incluir el archivo JavaScript externo para el gráfico de registros de ejercicio -->
+<script src="{% static 'js/registros_ejercicio.js' %}"></script>
 {% endif %}
 {% endblock %}
-
-

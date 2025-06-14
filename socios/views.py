@@ -225,6 +225,25 @@ def detalle_socio(request, id):
 
     # Asistencias
     asistencias = RegistroEntrada.objects.filter(socio=socio).order_by('-fecha_hora')
+    
+    # Calcular promedio de asistencias por semana
+    promedio_semanal = None
+    # Calcular asistencias de los últimos 30 días
+    asistencias_ultimo_mes = 0
+    
+    if asistencias.exists():
+        primera_asistencia = asistencias.last().fecha_hora
+        ultima_asistencia = asistencias.first().fecha_hora
+        
+        # Calcular semanas entre la primera y última asistencia
+        if primera_asistencia and ultima_asistencia:
+            dias_totales = (ultima_asistencia - primera_asistencia).days + 1
+            semanas_totales = max(1, dias_totales / 7)  # Mínimo 1 semana para evitar división por cero
+            promedio_semanal = round(asistencias.count() / semanas_totales, 1)
+            
+        # Contar asistencias de los últimos 30 días
+        fecha_limite = timezone.now() - timedelta(days=30)
+        asistencias_ultimo_mes = asistencias.filter(fecha_hora__gte=fecha_limite).count()
 
     # Método llamado desde AJAX, devolvemos JSON
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -258,6 +277,8 @@ def detalle_socio(request, id):
         'registros_ejercicio': registros_ejercicio,
         'ejercicio_seleccionado': ejercicio_seleccionado,
         'asistencias': asistencias,
+        'promedio_semanal': promedio_semanal,
+        'asistencias_ultimo_mes': asistencias_ultimo_mes,
     })
 
 def buscar_socios(request):
