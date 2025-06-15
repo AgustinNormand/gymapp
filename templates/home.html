@@ -147,7 +147,26 @@
     {% endif %}
 
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
+        // Scroll to table if it's displayed after clicking a button
+        const urlParams = new URLSearchParams(window.location.search);
+        const grupo = urlParams.get('grupo');
+        
+        if (grupo && ['no_pago_sin_asistencia', 'no_pago_con_asistencia', 'pago_sin_asistencia', 'pago_con_asistencia'].includes(grupo)) {
+            const tableCard = document.querySelector('.card.mt-4.shadow');
+            if (tableCard) {
+                // Scroll to show the title of the table
+                const headerOffset = 80; // Adjust this value to control how much of the header is visible
+                const elementPosition = tableCard.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }
+        
         function activarOrdenamiento() {
             const tabla = document.querySelector('.card table');
             if (!tabla) return;
