@@ -4,6 +4,29 @@
 
 {% block content %}
 
+<style>
+    .btn-hover {
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+    }
+    
+    .btn-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+    }
+    
+    .btn-hover .bi-arrow-right-circle {
+        font-size: 1.5rem;
+        opacity: 0.7;
+        transition: opacity 0.2s, transform 0.2s;
+    }
+    
+    .btn-hover:hover .bi-arrow-right-circle {
+        opacity: 1;
+        transform: translateX(5px);
+    }
+</style>
+
 {% load static %}
 
 <div class="text-center my-4">
@@ -18,8 +41,8 @@
         <div class="col-md-6"> 
             <div class="card text-white bg-success mb-3 shadow">
                 <div class="card-body">
-                    <h5 class="card-title">Socios Totales</h5>
-                    <p class="card-text fs-3">{{ total_socios }}</p>
+                    <h5 class="card-title text-center">Socios Totales</h5>
+                    <p class="card-text fs-3 text-center">{{ total_socios }}</p>
                 </div>
             </div>
         </div>
@@ -27,54 +50,66 @@
         <div class="col-md-6">
             <div class="card text-white bg-info mb-3 shadow">
                 <div class="card-body">
-                    <h5 class="card-title">Asistencias Hoy</h5>
-                    <p class="card-text fs-3">{{ asistencias_hoy }}</p>
+                    <h5 class="card-title text-center">Asistencias Hoy</h5>
+                    <p class="card-text fs-3 text-center">{{ asistencias_hoy }}</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="text-center mt-4 mb-2">
+    <div class="text-center mt-3 mb-1">
         <h2>Actividad mensual de Socios</h2>
     </div>
 
     <div class="row">
         <div class="col-md-6 col-lg-3">
             <a href="?grupo=no_pago_sin_asistencia{% if filtro %}&filtro={{ filtro }}{% endif %}" class="text-decoration-none">
-                <div class="card bg-danger text-white mb-3 shadow">
+                <div class="card bg-danger text-white mb-3 shadow position-relative btn-hover">
                     <div class="card-body">
-                        <h5 class="card-title">No pago, sin asistencias</h5>
-                        <p class="card-text fs-3">{{ socios_no_pago_sin_asistencia }}</p>
+                        <h5 class="card-title text-center">No pago, sin asistencias</h5>
+                        <p class="card-text fs-3 text-center">{{ socios_no_pago_sin_asistencia }}</p>
+                        <div class="position-absolute bottom-0 end-0 p-2">
+                            <i class="bi bi-arrow-right-circle"></i>
+                        </div>
                     </div>
                 </div>
             </a>
         </div>
         <div class="col-md-6 col-lg-3">
             <a href="?grupo=no_pago_con_asistencia{% if filtro %}&filtro={{ filtro }}{% endif %}" class="text-decoration-none">
-                <div class="card bg-warning text-dark mb-3 shadow">
+                <div class="card bg-warning text-white mb-3 shadow position-relative btn-hover">
                     <div class="card-body">
-                        <h5 class="card-title">No pago, con asistencias</h5>
-                        <p class="card-text fs-3">{{ socios_no_pago_con_asistencia }}</p>
+                        <h5 class="card-title text-center">No pago, con asistencias</h5>
+                        <p class="card-text fs-3 text-center">{{ socios_no_pago_con_asistencia }}</p>
+                        <div class="position-absolute bottom-0 end-0 p-2">
+                            <i class="bi bi-arrow-right-circle"></i>
+                        </div>
                     </div>
                 </div>
             </a>
         </div>
         <div class="col-md-6 col-lg-3">
             <a href="?grupo=pago_sin_asistencia{% if filtro %}&filtro={{ filtro }}{% endif %}" class="text-decoration-none">
-                <div class="card bg-secondary text-white mb-3 shadow">
+                <div class="card bg-secondary text-white mb-3 shadow position-relative btn-hover">
                     <div class="card-body">
-                        <h5 class="card-title">Pago, sin asistencias</h5>
-                        <p class="card-text fs-3">{{ socios_con_pago_sin_asistencia }}</p>
+                        <h5 class="card-title text-center">Pago, sin asistencias</h5>
+                        <p class="card-text fs-3 text-center">{{ socios_con_pago_sin_asistencia }}</p>
+                        <div class="position-absolute bottom-0 end-0 p-2">
+                            <i class="bi bi-arrow-right-circle"></i>
+                        </div>
                     </div>
                 </div>
             </a>
         </div>
         <div class="col-md-6 col-lg-3">
             <a href="?grupo=pago_con_asistencia{% if filtro %}&filtro={{ filtro }}{% endif %}" class="text-decoration-none">
-                <div class="card bg-primary text-white mb-3 shadow">
+                <div class="card bg-primary text-white mb-3 shadow position-relative btn-hover">
                     <div class="card-body">
-                        <h5 class="card-title">Pago, con asistencias</h5>
-                        <p class="card-text fs-3">{{ socios_con_pago_con_asistencia }}</p>
+                        <h5 class="card-title text-center">Pago, con asistencias</h5>
+                        <p class="card-text fs-3 text-center">{{ socios_con_pago_con_asistencia }}</p>
+                        <div class="position-absolute bottom-0 end-0 p-2">
+                            <i class="bi bi-arrow-right-circle"></i>
+                        </div>
                     </div>
                 </div>
             </a>
@@ -155,8 +190,9 @@
         if (grupo && ['no_pago_sin_asistencia', 'no_pago_con_asistencia', 'pago_sin_asistencia', 'pago_con_asistencia'].includes(grupo)) {
             const tableCard = document.querySelector('.card.mt-4.shadow');
             if (tableCard) {
-                // Scroll to show the title of the table
-                const headerOffset = 80; // Adjust this value to control how much of the header is visible
+                // Scroll to show the title of the table but hide the "Actividad mensual de Socios" header
+                // Usar un offset más pequeño para que el header no sea visible
+                const headerOffset = 240; // Valor reducido para ocultar el header de actividad mensual
                 const elementPosition = tableCard.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
                 
@@ -233,7 +269,7 @@
 
     <!-- Gráfico Unificado de Asistencias -->
     <div class="mb-5">
-        <div class="text-center mt-4 mb-2">
+        <div class="text-center mt-3 mb-1">
             <h2>Estadísticas de Asistencias</h2>
         </div>
         
