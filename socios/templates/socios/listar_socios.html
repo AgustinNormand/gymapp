@@ -21,8 +21,12 @@
     </div>
     
     <!-- Tabla de socios -->
-    <div id="tabla-socios">
-        {% include 'socios/tabla_socios.html' %}
+    <div class="row">
+        <div class="col-12 px-0">
+            <div id="tabla-socios">
+                {% include 'socios/tabla_socios.html' %}
+            </div>
+        </div>
     </div>
 </div>
 <script>
@@ -69,19 +73,43 @@
                 const filas = Array.from(tbody.querySelectorAll('tr'));
     
                 const filasOrdenadas = filas.sort((a, b) => {
-                    const aText = a.children[colIndex].textContent.trim();
-                    const bText = b.children[colIndex].textContent.trim();
-    
-                    const aNum = parseFloat(aText);
-                    const bNum = parseFloat(bText);
-                    const ambosNumeros = !isNaN(aNum) && !isNaN(bNum);
-    
-                    if (ambosNumeros) {
-                        return asc ? aNum - bNum : bNum - aNum;
-                    } else {
-                        return asc
-                            ? aText.localeCompare(bText)
-                            : bText.localeCompare(aText);
+                    let aValue, bValue;
+                    
+                    // Manejo especial para cada columna según su índice
+                    if (colIndex === 4) { // Datos Completos - columna con íconos
+                        // Para la columna de Datos Completos, verificamos si tiene el ícono de check (completo) o info (incompleto)
+                        aValue = a.children[colIndex].querySelector('.bi-check-circle-fill') ? 1 : 0;
+                        bValue = b.children[colIndex].querySelector('.bi-check-circle-fill') ? 1 : 0;
+                        return asc ? aValue - bValue : bValue - aValue;
+                    } 
+                    else if (colIndex === 5) { // Estado de Cuota - columna con badges
+                        // Para la columna de Estado de Cuota, ordenamos según la prioridad del estado
+                        const estadoPrioridad = {
+                            'Al día': 3,
+                            'Por vencer': 2,
+                            'Vencido': 1,
+                            'Sin pagos': 0
+                        };
+                        
+                        aValue = estadoPrioridad[a.children[colIndex].textContent.trim()] || 0;
+                        bValue = estadoPrioridad[b.children[colIndex].textContent.trim()] || 0;
+                        return asc ? aValue - bValue : bValue - aValue;
+                    }
+                    else { // Otras columnas con texto o números
+                        const aText = a.children[colIndex].textContent.trim();
+                        const bText = b.children[colIndex].textContent.trim();
+                        
+                        const aNum = parseFloat(aText);
+                        const bNum = parseFloat(bText);
+                        const ambosNumeros = !isNaN(aNum) && !isNaN(bNum);
+                        
+                        if (ambosNumeros) {
+                            return asc ? aNum - bNum : bNum - aNum;
+                        } else {
+                            return asc
+                                ? aText.localeCompare(bText)
+                                : bText.localeCompare(aText);
+                        }
                     }
                 });
     
@@ -111,7 +139,7 @@
                 });
             });
     
-            // Por defecto, ordenamos por ID si es la primera vez (podés protegerlo con una bandera si querés evitar duplicados)
+            // Por defecto, ordenamos por ID si es la primera vez
             if (headers.length > 0 && !document.body.classList.contains('ordenamiento-inicial')) {
                 const defaultHeader = headers[0];
                 ordenarTablaPorColumna(0, true);
@@ -134,7 +162,7 @@
                 .then(response => response.text())
                 .then(html => {
                     tablaDiv.innerHTML = html;
-                    activarOrdenamiento();  // 👈 Reasignar eventos después del reemplazo
+                    activarOrdenamiento();  // Reasignar eventos después del reemplazo
                 })
                 .catch(err => console.error("Error al actualizar tabla:", err));
         });

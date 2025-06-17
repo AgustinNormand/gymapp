@@ -57,7 +57,7 @@ docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -
 [] [Other] [Easy] Revisar el gráfico de estadisticas de asistencais de la home, a veces da valores raros, pero capaz están bien
 [] [Other] [Easy] Estandarizar los estilos de las tablas y el ordenamiento a lo largo de la app
 [] [Other] [Easy] Estandarizar los estilos de las acciones, a lo largo de la app
-[] [Other] [Easy] En la vista de "Asistencais Registradas" centrar el contenido de la tabla. 
+[] [Other] [Easy] Que la vista de pagos realizados, el titulo no esté mas a la izquierda que el contenido, agregar la posibilidad de filtrar data, como en asistencias registradas
 [] [Other] [Easy] Reordenar como se muestran los pesos de los ejercicios
 [] [Other] [Easy] Acomodar la vista de "Detalle de Socio"
 [] [Other] [Easy] Revisar los formularios de "Gestionar Ejercicios", "Gestionar Pagos" ...

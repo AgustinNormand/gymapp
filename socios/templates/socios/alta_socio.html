@@ -3,6 +3,9 @@
 {% block title %}Alta de Socio - CINAF{% endblock %}
 
 {% block content %}
+<div class="container mt-5">
+    <!-- Contenedor principal para alinear ambos elementos -->
+
     <h2>Alta de Socio</h2>
     <form method="post">
         {% csrf_token %}
@@ -47,4 +50,5 @@
             }
         }
     </script>
+</div>
 {% endblock %}

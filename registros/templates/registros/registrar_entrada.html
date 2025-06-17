@@ -100,21 +100,33 @@
 {% endblock %}
 
 {% block content %}
-<h2>Registrar Asistencia</h2>
+<div class="container mt-5">
+    <h2>Registrar Asistencia</h2>
 
-<form method="POST" action="{% url 'alta_entrada' %}" id="formEntrada">
-    {% csrf_token %}
-    <div class="mb-3">
-        <label for="busquedaSocio" class="form-label">Buscar socio</label>
-        <input type="text" id="busquedaSocio" class="form-control" placeholder="Nombre o apellido" autocomplete="off">
-        <ul class="list-group mt-1" id="resultadosBusqueda"></ul>
-        <input type="hidden" name="socio_id" id="socioID">
+<!-- Sección de búsqueda con estilo mejorado -->
+    <div class="d-flex justify-content-center mb-4">
+        <div class="bg-white shadow rounded-3 p-4 w-100" style="max-width: 1400px;">
+            
+
+                                    <div style="max-width: 600px; margin: 0 auto;">
+                <form style="background: transparent; box-shadow: none; padding: 0; margin-bottom: 0;" method="POST" action="{% url 'alta_entrada' %}" id="formEntrada">
+                {% csrf_token %}
+                <label for="busquedaSocio" class="form-label fw-bold">Buscar socio:</label>
+                <div class="input-group mb-2">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" id="busquedaSocio" class="form-control" placeholder="Ingrese nombre o apellido del socio..." autocomplete="off">
+                </div>
+                <small class="text-muted">La búsqueda se actualiza automáticamente mientras escribe</small>
+                <ul class="list-group mt-2" id="resultadosBusqueda"></ul>
+                <input type="hidden" name="socio_id" id="socioID">
+            </form>
+            </div>
+
+        </div>
     </div>
-</form>
+<!-- Fin bloque de búsqueda -->
 
-<div class="container-fluid mt-4">
-    <h4 class="mb-3 text-center">Asistencias registradas en esta hora</h4>
-    
+<div class="mt-4">
     <style>
         /* Estilos para tabla ajustada al ancho completo */
         .table-ejercicios {
