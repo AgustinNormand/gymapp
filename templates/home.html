@@ -36,13 +36,36 @@
             <div class="tooltip-content" id="birthday-tooltip">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
-                        <strong>¡Cumpleaños de esta semana!</strong>
+                        <strong>¡Cumpleaños de hoy!</strong>
                     </div>
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
                             {% for socio in socios_cumpleanos %}
-                                <li class="list-group-item">
-                                    {{ socio.nombre }} {{ socio.apellido }} - {{ socio.fecha_cumple|date:"d/m" }}
+                                <li class="list-group-item d-flex align-items-center">
+                                    <span class="me-auto">{{ socio.nombre }} {{ socio.apellido }} - {{ socio.fecha_cumple|date:"d/m" }}</span>
+                                    {% if socio.telefono %}
+                                        {% with phone_number=socio.telefono %}
+                                            {% if phone_number|slice:":1" == "+" %}
+                                                {% with formatted_number=phone_number|slice:"1:" %}
+                                                    <a href="https://wa.me/{{ formatted_number }}?text=Desde%20CINAF%20te%20deseamos%20un%20%C2%A1%C2%A1Feliz%20cumplea%C3%B1os%20{{ socio.nombre }}!!" target="_blank" class="btn btn-sm btn-success ms-2" title="Enviar saludo por WhatsApp">
+                                                        <i class="bi bi-whatsapp"></i>
+                                                    </a>
+                                                {% endwith %}
+                                            {% elif phone_number|slice:":2" == "54" %}
+                                                <a href="https://wa.me/{{ phone_number }}?text=Desde%20CINAF%20te%20deseamos%20un%20%C2%A1%C2%A1Feliz%20cumplea%C3%B1os%20{{ socio.nombre }}!!" target="_blank" class="btn btn-sm btn-success ms-2" title="Enviar saludo por WhatsApp">
+                                                    <i class="bi bi-whatsapp"></i>
+                                                </a>
+                                            {% else %}
+                                                <a href="https://wa.me/54{{ phone_number }}?text=Desde%20CINAF%20te%20deseamos%20un%20%C2%A1%C2%A1Feliz%20cumplea%C3%B1os%20{{ socio.nombre }}!!" target="_blank" class="btn btn-sm btn-success ms-2" title="Enviar saludo por WhatsApp">
+                                                    <i class="bi bi-whatsapp"></i>
+                                                </a>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% else %}
+                                        <span class="btn btn-sm btn-secondary ms-2" title="No tiene teléfono registrado">
+                                            <i class="bi bi-telephone-x"></i>
+                                        </span>
+                                    {% endif %}
                                 </li>
                             {% endfor %}
                         </ul>
@@ -59,7 +82,7 @@
                         <strong>Cumpleaños</strong>
                     </div>
                     <div class="card-body text-center">
-                        Esta semana no estamos de cumpleañito
+                        Hoy no estamos de cumpleañito
                     </div>
                 </div>
             </div>

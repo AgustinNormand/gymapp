@@ -54,6 +54,7 @@ docker cp backup_gymdb.backup gymapp-db-1:/tmp/
 docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -v /tmp/backup_gymdb.backup
 
 ## Pending Tasks - Sorted by priority
+[] [Other] [Easy] Revisar el gráfico de estadisticas de asistencais de la home, a veces da valores raros, pero capaz están bien
 [] [Other] [Easy] Mostrar los cumpleaños de la semana. Cuando se pasa la asistencia de alguien que es el cumpleaños, mostrar una animación. (Cuando hay algún cumpleaños esta semana, que el logito de Cinaf, aparezca con un sombrerito de cumpleaños)
 [] [Other] [Easy] Impedir registrar mas de una asistencia, en una misma hora, para un socio
 [] [Other] [Easy] Estandarizar los estilos de las tablas y el ordenamiento a lo largo de la app
