@@ -55,8 +55,6 @@ docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -
 
 ## Pending Tasks - Sorted by priority
 [] [Other] [Easy] Revisar el gráfico de estadisticas de asistencais de la home, a veces da valores raros, pero capaz están bien
-[] [Other] [Easy] Mostrar los cumpleaños de la semana. Cuando se pasa la asistencia de alguien que es el cumpleaños, mostrar una animación. (Cuando hay algún cumpleaños esta semana, que el logito de Cinaf, aparezca con un sombrerito de cumpleaños)
-[] [Other] [Easy] Impedir registrar mas de una asistencia, en una misma hora, para un socio
 [] [Other] [Easy] Estandarizar los estilos de las tablas y el ordenamiento a lo largo de la app
 [] [Other] [Easy] Estandarizar los estilos de las acciones, a lo largo de la app
 [] [Other] [Easy] En la vista de "Asistencais Registradas" centrar el contenido de la tabla. 
@@ -65,8 +63,6 @@ docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -
 [] [Other] [Easy] Acomodar la vista de "Detalle de Socio"
 [] [Other] [Easy] Revisar los formularios de "Gestionar Ejercicios", "Gestionar Pagos" ...
 [] [Other] [Easy] Cuando una persona puede ahorrar plata, agregar el link a WPP, o agregar un ícono cuando le paso asistencia (Que al presionarlo, me redirija, a la vista de "Evolución Semanal")
-[] [Other] [Easy] Cuando persiono "Aplicar filtros" en el gráfico de asistencias de socios, me está scrolleando, pero para arriba, no para abajo
-[] [Other] [Easy] En la vista de "editar socio" no se está autocompletando con la fecha de nacimiento cargada
 [] [Other] [Easy] Permitir que se pueda cargar una asistencia de un momento pasado
 [] [Functional] [Easy] Levantar un warning, cuando una persona, hace un més, no modifica el peso de sus ejercicios
 [] [Other] [Easy] Cuando desplego la lista de acciones en la tabla de asistencias, no se llega a ver el desplegable

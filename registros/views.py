@@ -156,8 +156,22 @@ def alta_entrada(request):
     if socio_id:
         socio = Socio.objects.filter(id=socio_id).first()
         if socio:
-            RegistroEntrada.objects.create(socio=socio)
-            messages.success(request, f'Entrada registrada para {socio.nombre} {socio.apellido}.')
+            # Verificar si ya existe un registro para este socio en la hora actual
+            ahora = now()
+            inicio_hora = ahora.replace(minute=0, second=0, microsecond=0)
+            fin_hora = ahora.replace(minute=59, second=59, microsecond=999999)
+            
+            # Buscar si ya existe un registro para este socio en la hora actual
+            registro_existente = RegistroEntrada.objects.filter(
+                socio=socio,
+                fecha_hora__range=(inicio_hora, fin_hora)
+            ).exists()
+            
+            if registro_existente:
+                messages.warning(request, f'Ya existe un registro de entrada para {socio.nombre} {socio.apellido} en esta hora.')
+            else:
+                RegistroEntrada.objects.create(socio=socio)
+                messages.success(request, f'Entrada registrada para {socio.nombre} {socio.apellido}.')
         else:
             messages.error(request, 'Socio no encontrado.')
     else:
