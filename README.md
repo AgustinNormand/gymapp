@@ -64,6 +64,7 @@ docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -
 [] [Other] [Easy] Acomodar la vista de "Detalle de Socio"
 [] [Other] [Easy] Revisar los formularios de "Gestionar Ejercicios", "Gestionar Pagos" ...
 [] [Other] [Easy] Cuando una persona puede ahorrar plata, agregar el link a WPP, o agregar un ícono cuando le paso asistencia (Que al presionarlo, me redirija, a la vista de "Evolución Semanal")
+[] [Other] [Easy] Cuando persiono "Aplicar filtros" en el gráfico de asistencias de socios, me está scrolleando, pero para arriba, no para abajo
 
 [] [Other] [Easy] Permitir que se pueda cargar una asistencia de un momento pasado
 [] [Functional] [Easy] Levantar un warning, cuando una persona, hace un més, no modifica el peso de sus ejercicios

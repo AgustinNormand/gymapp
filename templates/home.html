@@ -30,8 +30,74 @@
 {% load static %}
 
 <div class="text-center my-4">
-    <img src="{% static 'img/cinaf_logo.png' %}" alt="Logo CINAF" style="max-height: 200px;">
+    {% if hay_cumpleanos %}
+        <div class="position-relative" id="logo-container">
+            <img src="{% static 'img/cinaf_logo_cumple.png' %}" alt="Logo CINAF Cumpleaños" style="max-height: 200px;">
+            <div class="tooltip-content" id="birthday-tooltip">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <strong>¡Cumpleaños de esta semana!</strong>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            {% for socio in socios_cumpleanos %}
+                                <li class="list-group-item">
+                                    {{ socio.nombre }} {{ socio.apellido }} - {{ socio.fecha_cumple|date:"d/m" }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="position-relative" id="logo-container">
+            <img src="{% static 'img/cinaf_logo.png' %}" alt="Logo CINAF" style="max-height: 200px;">
+            <div class="tooltip-content" id="birthday-tooltip">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <strong>Cumpleaños</strong>
+                    </div>
+                    <div class="card-body text-center">
+                        Esta semana no estamos de cumpleañito
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div>
+
+<style>
+    #logo-container {
+        display: inline-block;
+        cursor: pointer;
+    }
+    
+    .tooltip-content {
+        display: none;
+        position: absolute;
+        z-index: 100;
+        width: 300px;
+        top: 0;
+        left: 100%;
+        transform: none;
+        margin-left: 15px;
+    }
+    
+    #logo-container:hover .tooltip-content {
+        display: block;
+    }
+    
+    .tooltip-content::before {
+        content: '';
+        position: absolute;
+        top: 15px;
+        right: 100%;
+        border-width: 8px;
+        border-style: solid;
+        border-color: transparent #007bff transparent transparent;
+    }
+</style>
 
 
 

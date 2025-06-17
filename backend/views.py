@@ -14,6 +14,42 @@ def home(request):
     total_socios = Socio.objects.filter().count()
     asistencias_hoy = RegistroEntrada.objects.filter(fecha_hora__date=hoy).count()
     
+    # Calcular el inicio y fin de la semana actual (lunes a domingo)
+    inicio_semana = hoy - timedelta(days=hoy.weekday())
+    fin_semana = inicio_semana + timedelta(days=6)
+    
+    # Buscar socios que cumplen años esta semana
+    socios_cumpleanos = []
+    
+    # Para depuración: imprimir fechas
+    print(f"Fecha actual: {hoy}")
+    print(f"Inicio de semana: {inicio_semana}")
+    print(f"Fin de semana: {fin_semana}")
+    
+    # Obtener todos los socios con fecha de nacimiento
+    socios_con_fecha = Socio.objects.filter(fecha_nacimiento__isnull=False)
+    print(f"Total socios con fecha de nacimiento: {socios_con_fecha.count()}")
+    
+    for socio in socios_con_fecha:
+        if socio.fecha_nacimiento:
+            # Verificar si el cumpleaños cae en esta semana (ignorando el año)
+            fecha_cumple_este_anio = socio.fecha_nacimiento.replace(year=hoy.year)
+            print(f"Socio: {socio.nombre} {socio.apellido}, Cumpleaños este año: {fecha_cumple_este_anio}")
+            
+            if inicio_semana <= fecha_cumple_este_anio <= fin_semana:
+                print(f"¡CUMPLE ESTA SEMANA! {socio.nombre} {socio.apellido}")
+                # Agregar a la lista con la fecha del cumpleaños
+                socios_cumpleanos.append({
+                    'nombre': socio.nombre,
+                    'apellido': socio.apellido,
+                    'fecha_cumple': fecha_cumple_este_anio
+                })
+    
+    print(f"Total socios que cumplen esta semana: {len(socios_cumpleanos)}")
+    
+    # Ordenar por fecha de cumpleaños
+    socios_cumpleanos.sort(key=lambda x: x['fecha_cumple'])
+    
     # --- Configuración de fechas y agrupación ---
     tipo_agrupacion = request.GET.get('tipo_agrupacion', 'hora')  # Por defecto agrupar por hora
     fecha_inicio = request.GET.get('fecha_inicio')
@@ -316,11 +352,15 @@ def home(request):
             titulo_detalle += f" - Filtro: {filtro}"
     
     # Preparar el contexto para la plantilla
-    context = {
+    # Asegurarse de que hay_cumpleanos sea correcto
+    hay_cumpleanos = len(socios_cumpleanos) > 0
+    print(f"¿Hay cumpleaños esta semana?: {hay_cumpleanos}")
+    
+    return render(request, 'home.html', {
         'total_socios': total_socios,
         'asistencias_hoy': asistencias_hoy,
         'etiquetas': etiquetas_json,
-        'datos': cantidades_json,
+        'cantidades': cantidades_json,
         'titulo_grafico': titulo_grafico,
         'tipo_eje_x': tipo_eje_x,
         'fecha_inicio': fecha_inicio.strftime('%Y-%m-%d'),
@@ -334,7 +374,7 @@ def home(request):
         'socios_no_pago_con_asistencia': socios_no_pago_con_asistencia,
         'socios_con_pago_sin_asistencia': socios_con_pago_sin_asistencia,
         'socios_con_pago_con_asistencia': socios_con_pago_con_asistencia,
-        'socios_detalle': socios_detalle
-    }
-    
-    return render(request, 'home.html', context)
+        'socios_detalle': socios_detalle,
+        'socios_cumpleanos': socios_cumpleanos,
+        'hay_cumpleanos': hay_cumpleanos
+    })
