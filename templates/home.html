@@ -249,17 +249,39 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Scroll to table if it's displayed after clicking a button
+        // Check URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const grupo = urlParams.get('grupo');
+        const tipoAgrupacion = urlParams.get('tipo_agrupacion');
+        const fechaInicio = urlParams.get('fecha_inicio');
+        const fechaFin = urlParams.get('fecha_fin');
         
-        if (grupo && ['no_pago_sin_asistencia', 'no_pago_con_asistencia', 'pago_sin_asistencia', 'pago_con_asistencia'].includes(grupo)) {
+        // Check if chart filters are being applied
+        const isChartFilter = tipoAgrupacion || fechaInicio || fechaFin;
+        
+        // Scroll to table if it's displayed after clicking a button (and not applying chart filters)
+        if (grupo && ['no_pago_sin_asistencia', 'no_pago_con_asistencia', 'pago_sin_asistencia', 'pago_con_asistencia'].includes(grupo) && !isChartFilter) {
             const tableCard = document.querySelector('.card.mt-4.shadow');
             if (tableCard) {
                 // Scroll to show the title of the table but hide the "Actividad mensual de Socios" header
                 // Usar un offset más pequeño para que el header no sea visible
                 const headerOffset = 240; // Valor reducido para ocultar el header de actividad mensual
                 const elementPosition = tableCard.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }
+        
+        // Scroll to chart if chart filters are being applied
+        if (isChartFilter) {
+            const chartSection = document.querySelector('.chart-container');
+            if (chartSection) {
+                const headerOffset = 350; // Adjust this value as needed
+                const elementPosition = chartSection.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
                 
                 window.scrollTo({
@@ -452,6 +474,15 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('Inicializando gráfico...');
         
+        // Verificar si la sección del gráfico está visible
+        const chartSection = document.querySelector('.chart-container');
+        if (chartSection) {
+            console.log('Sección del gráfico encontrada:', chartSection);
+            console.log('Dimensiones del gráfico:', chartSection.getBoundingClientRect());
+        } else {
+            console.error('No se encontró la sección del gráfico (.chart-container)');
+        }
+        
         // Configurar fechas por defecto
         actualizarFechas();
         
@@ -462,13 +493,39 @@
             console.error('No se encontró el elemento canvas con ID "asistenciasChart"');
             return;
         }
+        console.log('Canvas encontrado:', ctx);
         
         try {
             // Datos del gráfico (proporcionados por Django)
-            const etiquetas = JSON.parse('{{ etiquetas|safe|escapejs }}');
-            const datos = JSON.parse('{{ datos|safe|escapejs }}');
-            const titulo = '{{ titulo_grafico|escapejs }}';
-            const tipoEjeX = '{{ tipo_eje_x|escapejs }}';
+            let etiquetas = [];
+            let datos = [];
+            let titulo = 'Estadísticas de Asistencias';
+            let tipoEjeX = 'Periodo';
+            
+            try {
+                // Intentar parsear los datos si existen
+                const etiquetasStr = '{{ etiquetas|safe|escapejs }}';
+                const datosStr = '{{ cantidades|safe|escapejs }}';
+                
+                if (etiquetasStr && etiquetasStr.trim() !== '') {
+                    etiquetas = JSON.parse(etiquetasStr);
+                }
+                
+                if (datosStr && datosStr.trim() !== '') {
+                    datos = JSON.parse(datosStr);
+                }
+                
+                if ('{{ titulo_grafico|escapejs }}' && '{{ titulo_grafico|escapejs }}'.trim() !== '') {
+                    titulo = '{{ titulo_grafico|escapejs }}';
+                }
+                
+                if ('{{ tipo_eje_x|escapejs }}' && '{{ tipo_eje_x|escapejs }}'.trim() !== '') {
+                    tipoEjeX = '{{ tipo_eje_x|escapejs }}';
+                }
+            } catch (parseError) {
+                console.error('Error al parsear datos del gráfico:', parseError);
+                // Usar valores predeterminados si hay error
+            }
             
             console.log('Etiquetas:', etiquetas);
             console.log('Datos:', datos);
