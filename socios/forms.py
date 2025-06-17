@@ -12,18 +12,16 @@ class SocioForm(forms.ModelForm):
 
     class Meta:
         model = Socio
-        fields = ['nombre', 'apellido', 'email', 'telefono', 'fecha_nacimiento']
+        fields = ['nombre', 'apellido', 'telefono', 'fecha_nacimiento']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'apellido': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
             'fecha_nacimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['email'].required = False
         self.fields['telefono'].required = False
         self.fields['fecha_nacimiento'].required = False
 
@@ -31,20 +29,23 @@ class SocioForm(forms.ModelForm):
 class SocioEditForm(forms.ModelForm):
     class Meta:
         model = Socio
-        fields = ['nombre', 'apellido', 'email', 'telefono', 'fecha_nacimiento']
+        fields = ['nombre', 'apellido', 'telefono', 'fecha_nacimiento']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'apellido': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
             'fecha_nacimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['email'].required = False
         self.fields['telefono'].required = False
         self.fields['fecha_nacimiento'].required = False
+        
+        # Formatear correctamente la fecha de nacimiento para el input HTML de tipo date
+        if self.instance and self.instance.fecha_nacimiento:
+            # Convertir la fecha al formato ISO (YYYY-MM-DD) que requiere el input type='date'
+            self.initial['fecha_nacimiento'] = self.instance.fecha_nacimiento.strftime('%Y-%m-%d')
 
 
 class ObservacionForm(forms.ModelForm):
