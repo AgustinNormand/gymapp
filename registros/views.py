@@ -162,7 +162,14 @@ def alta_entrada(request):
             messages.error(request, 'Socio no encontrado.')
     else:
         messages.error(request, 'No se proporcionó un ID de socio.')
-    return redirect('registrar_entrada')
+    
+    # Si se registró correctamente la asistencia, redirigir con el ID del socio como parámetro
+    from django.urls import reverse
+    if socio_id and socio:
+        url = reverse('registrar_entrada')
+        return redirect(f'{url}?registrado={socio_id}')
+    else:
+        return redirect('registrar_entrada')
 
 def eliminar_entrada(request, id):
     # Este método se encarga de eliminar la entrada de un socio al gimnasio.
@@ -187,6 +194,11 @@ def registrar_entrada(request):
     ahora = now()
     inicio_hora = ahora.replace(minute=0, second=0, microsecond=0)
     fin_hora = ahora.replace(minute=59, second=59, microsecond=999999)
+    
+    # Calcular inicio y fin de la semana actual (lunes a domingo)
+    hoy = ahora.date()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())
+    fin_semana = inicio_semana + timedelta(days=6)
 
     observaciones_activas = Prefetch(
     'socio__observaciones',
@@ -210,12 +222,26 @@ def registrar_entrada(request):
         Prefetch('socio', queryset=Socio.objects.prefetch_related(observaciones_activas, observaciones_pasadas))
     )
 
+    # Verificar si algún socio de las entradas registradas cumple años esta semana
+    socios_cumpleanos = []
+    for entrada in entradas_hoy:
+        socio = entrada.socio
+        if socio.fecha_nacimiento:
+            fecha_cumple_este_anio = socio.fecha_nacimiento.replace(year=hoy.year)
+            if inicio_semana <= fecha_cumple_este_anio <= fin_semana:
+                socios_cumpleanos.append({
+                    'id': socio.id,
+                    'nombre': socio.nombre,
+                    'apellido': socio.apellido,
+                    'fecha_cumple': fecha_cumple_este_anio
+                })
 
     ejercicios = Ejercicio.objects.all().order_by('nombre')
 
     return render(request, 'registros/registrar_entrada.html', {
         'entradas_hora': entradas_hoy,
         'ejercicios': ejercicios,
+        'socios_cumpleanos': socios_cumpleanos,
     })
 
 def listar_entradas(request):

@@ -1,6 +1,104 @@
 {% extends 'base.html' %}
 {% load dict_filters %}
 {% block title %}Registrar Asistencia{% endblock %}
+
+{% block extra_css %}
+<!-- Estilos para la animación de globos y mensaje de felicitación -->
+<style>
+    /* Contenedor para la celebración de cumpleaños */
+    .birthday-celebration {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        pointer-events: none;
+        overflow: hidden;
+        background-color: transparent;
+    }
+    
+    /* Mensaje de felicitación */
+    .birthday-message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+        padding: 20px 40px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        z-index: 10000;
+        animation: fadeInOut 5s ease-in-out;
+        pointer-events: none;
+    }
+    
+    .birthday-message h2 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        color: #ff4081;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .birthday-message p {
+        font-size: 1.5rem;
+        margin: 0;
+        color: #333;
+    }
+    
+    /* Globos */
+    .balloon {
+        position: absolute;
+        width: 60px;
+        height: 80px;
+        background-color: red; /* Color sólido para depurar */
+        border-radius: 50%;
+        transform-origin: bottom center;
+        animation: float 10s ease-in-out forwards;
+        top: -100px; /* Comienza fuera de la pantalla arriba */
+        opacity: 0.9;
+        z-index: 10000; /* Asegurarse de que esté por encima de otros elementos */
+    }
+    
+    .balloon:before {
+        content: '';
+        position: absolute;
+        width: 2px;
+        height: 40px;
+        background-color: #ddd;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    /* Animaciones */
+    @keyframes float {
+        0% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 0;
+        }
+        10% {
+            opacity: 1;
+        }
+        90% {
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(100vh) rotate(20deg); /* Cae hacia abajo */
+            opacity: 0;
+        }
+    }
+    
+    @keyframes fadeInOut {
+        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        85% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <h2>Registrar Asistencia</h2>
 
@@ -214,6 +312,15 @@
     </div>
 </div>
 
+<!-- Contenedor para el mensaje de felicitación -->
+<div id="birthdayMessage" class="birthday-message" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; background-color: rgba(255, 255, 255, 0.9); padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); text-align: center;">
+    <h2 style="font-size: 32px; margin-bottom: 10px; color: #ff4081;">¡Feliz cumpleaños!</h2>
+    <div id="birthdayName" style="font-size: 24px; font-weight: bold;"></div>
+</div>
+
+<!-- Canvas para confeti -->
+<canvas id="confetti-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none; display: none;"></canvas>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const input = document.getElementById("busquedaSocio");
@@ -279,5 +386,150 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+    
+    // Función para crear y mostrar confeti
+    function createBalloons() {
+        console.log('Iniciando animación de confeti...');
+        
+        const canvas = document.getElementById('confetti-canvas');
+        canvas.style.display = 'block';
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Configuración de confeti
+        const confettiCount = 200;
+        const gravity = 0.5;
+        const terminalVelocity = 5;
+        const drag = 0.075;
+        const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
+        
+        // Arreglo para almacenar las partículas de confeti
+        const confetti = [];
+        
+        // Clase para representar una partícula de confeti
+        class Confetto {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * -canvas.height;
+                this.w = (Math.random() * 8) + 5;
+                this.h = (Math.random() * 6) + 8;
+                this.radius = Math.floor(Math.random() * 4) + 1;
+                this.vx = (Math.random() * 4) - 2;
+                this.vy = (Math.random() * 2) + 1;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 10;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += gravity;
+                this.vy = Math.min(this.vy, terminalVelocity);
+                this.vx *= (1 - drag);
+                this.rotation += this.rotationSpeed;
+                
+                if (this.y > canvas.height) {
+                    this.y = -20;
+                    this.vy = (Math.random() * 2) + 1;
+                }
+            }
+            
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.w / 2, -this.h / 2, this.w, this.h);
+                
+                ctx.restore();
+            }
+        }
+        
+        // Crear las partículas de confeti
+        for (let i = 0; i < confettiCount; i++) {
+            confetti.push(new Confetto());
+        }
+        
+        // Función para animar el confeti
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            confetti.forEach(confetto => {
+                confetto.update();
+                confetto.draw();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Iniciar la animación
+        animate();
+        
+        // Detener la animación después de un tiempo
+        setTimeout(() => {
+            console.log('Deteniendo animación de confeti...');
+            canvas.style.display = 'none';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }, 10000); // 10 segundos
+    }
+    
+    // Función para mostrar el mensaje de felicitación
+    function showBirthdayMessage(name) {
+        const birthdayMessage = document.getElementById('birthdayMessage');
+        const birthdayName = document.getElementById('birthdayName');
+        
+        birthdayName.textContent = '¡' + name + '!'; 
+        birthdayMessage.style.display = 'block';
+        
+        console.log('Mostrando mensaje de felicitación para:', name);
+        
+        // Ocultar el mensaje después de un tiempo
+        setTimeout(() => {
+            birthdayMessage.style.display = 'none';
+        }, 10000); // 10 segundos
+    }
+    
+    // Verificar si hay socios con cumpleaños esta semana y mostrar celebración
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM cargado, verificando parámetros URL');
+        const urlParams = new URLSearchParams(window.location.search);
+        const registradoId = urlParams.get('registrado');
+        console.log('ID del socio registrado:', registradoId);
+        
+        if (registradoId) {
+            console.log('Se encontró un ID de socio en la URL');
+            // Datos de socios con cumpleaños esta semana
+            const sociosCumpleanos = [
+                {% for socio in socios_cumpleanos %}
+                    {
+                        id: "{{ socio.id }}",
+                        nombre: "{{ socio.nombre }}",
+                        apellido: "{{ socio.apellido }}"
+                    }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ];
+            
+            console.log('Socios con cumpleaños esta semana:', sociosCumpleanos);
+            
+            // Buscar si el socio que registró asistencia cumple años esta semana
+            const socioCumple = sociosCumpleanos.find(socio => socio.id === registradoId);
+            console.log('Socio con cumpleaños encontrado:', socioCumple);
+            
+            if (socioCumple) {
+                console.log('Iniciando animación de globos y mensaje de cumpleaños');
+                createBalloons();
+                showBirthdayMessage(socioCumple.nombre, socioCumple.apellido);
+                // Eliminar el parámetro de la URL para evitar que se muestre de nuevo al recargar
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else {
+                console.log('El socio no cumple años esta semana');
+            }
+        } else {
+            console.log('No se encontró parámetro de socio registrado en la URL');
+        }
+    });
 </script>
 {% endblock %}
