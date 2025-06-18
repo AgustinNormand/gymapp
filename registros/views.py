@@ -16,6 +16,7 @@ from ejercicios.models import Ejercicio
 from datetime import datetime, timedelta
 from django.utils.timezone import now
 from decimal import Decimal
+from backend.decorators import role_required
 
 
 def evolucion_semanal(request):
@@ -144,6 +145,7 @@ def evolucion_semanal(request):
 
 ############ ABM de Entradas ############
 
+@role_required(["Profesor"])
 @require_POST
 def alta_entrada(request):
     # Este método se encarga de confirmar la entrada de un socio al gimnasio.
@@ -202,6 +204,7 @@ def eliminar_entrada(request, id):
 
 ############ Otros métodos ############
 
+@role_required(["Profesor"])
 def registrar_entrada(request):
     # Este método se encarga de registrar la entrada de un socio al gimnasio.
 
@@ -258,6 +261,7 @@ def registrar_entrada(request):
         'socios_cumpleanos': socios_cumpleanos,
     })
 
+@role_required(["Profesor"])
 def listar_entradas(request):
     hoy = date.today()
 
