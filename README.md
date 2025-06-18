@@ -54,6 +54,9 @@ docker cp backup_gymdb.backup gymapp-db-1:/tmp/
 docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -v /tmp/backup_gymdb.backup
 
 ## Pending Tasks - Sorted by priority
+[] [Other] [Easy] La tabla de pagos, no permite filtrar por nombre
+[] [Other] [Easy] La tabla de socios, no se ve el deslegable cuando es la úlima fila
+[] [Other] [Easy] Agregar a lista de acciones, un botón de agrgar al grupo de whatsapp
 [] [Other] [Easy] La vista de evolución semanal, habría que cambiar la columna de "Socio" para estandarizar con el resto
 [] [Other] [Easy] Algunas tablas no están 100% centradas
 [] [Other] [Easy] Centrar los filtros, en la vista de "Pagos Realizados", "Asistencias Registradas"
