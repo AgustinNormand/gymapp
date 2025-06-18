@@ -33,7 +33,8 @@
         <table class="table table-striped table-hover">
         <thead>
             <tr>
-                <th class="text-center">Socio</th>
+                <th class="text-center">Nombre</th>
+                <th class="text-center">Apellido</th>
                 <th class="text-center">Fecha</th>
                 <th class="text-center">Hora</th>
                 <th class="acciones-col">Acciones</th>
@@ -42,8 +43,8 @@
         <tbody>
             {% for entrada in entradas %}
                 <tr>
-                    <td class="text-center">
-                        {{ entrada.socio.nombre }} {{ entrada.socio.apellido }}
+                    <td class="text-center">{{ entrada.socio.nombre }}</td>
+                    <td class="text-center">{{ entrada.socio.apellido }}
                         {% if not entrada.socio.has_all_data %}
                             <i class="bi bi-info-circle-fill text-warning ms-1" title="Faltan datos opcionales"></i>
                         {% endif %}
@@ -69,7 +70,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">No hay entradas para mostrar.</td>
+                    <td colspan="5" class="text-center">No hay entradas para mostrar.</td>
                 </tr>
             {% endfor %}
         </tbody>

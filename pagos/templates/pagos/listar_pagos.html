@@ -33,7 +33,8 @@
     <table id="tablaPagos" class="table table-striped table-hover">
         <thead>
             <tr>
-                <th class="text-center">Socio</th>
+                <th class="text-center">Nombre</th>
+                <th class="text-center">Apellido</th>
                 <th class="text-center">Monto</th>
                 <th class="text-center">Fecha de Pago</th>
                 <th class="text-center">Fecha de Vencimiento</th>
@@ -43,7 +44,8 @@
         <tbody>
             {% for pago in pagos %}
                 <tr>
-                    <td class="text-center">{{ pago.socio.nombre }} {{ pago.socio.apellido }}
+                    <td class="text-center">{{ pago.socio.nombre }}</td>
+                    <td class="text-center">{{ pago.socio.apellido }}
                         {% if not socio.has_all_data %}
                             <i class="bi bi-info-circle-fill text-warning ms-1" title="Faltan datos opcionales"></i>
                         {% endif %}

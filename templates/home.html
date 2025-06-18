@@ -214,15 +214,16 @@
                     <thead>
                         <tr>
                             <th class="sortable cursor-pointer text-nowrap" data-col="0">Nombre <span class="sort-icon">⇅</span></th>
-                            <th class="sortable cursor-pointer text-nowrap" data-col="1">Días sin asistir <span class="sort-icon">⇅</span></th>
+                            <th class="sortable cursor-pointer text-nowrap" data-col="1">Apellido <span class="sort-icon">⇅</span></th>
+                            <th class="sortable cursor-pointer text-nowrap" data-col="2">Días sin asistir <span class="sort-icon">⇅</span></th>
                             <th class="acciones-col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for socio in socios_detalle %}
                         <tr>
-                            <td>
-                                {{ socio.nombre }} {{ socio.apellido }}
+                            <td>{{ socio.nombre }}</td>
+                                <td>{{ socio.apellido }}
                                 {% if not socio.has_all_data %}
                                     <i class="bi bi-info-circle-fill text-warning ms-1" title="Faltan datos opcionales"></i>
                                 {% endif %}
