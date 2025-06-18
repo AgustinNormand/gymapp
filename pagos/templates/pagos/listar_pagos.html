@@ -37,7 +37,7 @@
                 <th class="text-center">Monto</th>
                 <th class="text-center">Fecha de Pago</th>
                 <th class="text-center">Fecha de Vencimiento</th>
-                <th class="text-center">Acciones</th>
+                <th class="acciones-col">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -52,18 +52,16 @@
                     <td class="text-center">{{ pago.fecha_pago|date:"d/m/Y" }}</td>
                     <td class="text-center">{{ pago.fecha_vencimiento|date:"d/m/Y" }}</td>
                     <td class="text-center">
-                        <a href="{% url 'socios:detalle_socio' pago.socio.id %}" 
-                           class="text-info text-decoration-none" title="Ver detalle del socio">
-                            <i class="bi bi-person-lines-fill"></i>
-                        </a>
-                        <a href="{% url 'socios:editar_socio' pago.socio.id %}" 
-                           class="ms-1 text-decoration-none" title="Editar socio">
-                            <i class="bi bi-pencil-fill text-primary"></i>
-                        </a>
-                        <a href="{% url 'pagos:eliminar_pago' pago.id %}" 
-                           class="ms-1 text-danger text-decoration-none" title="Eliminar pago">
-                            <i class="bi bi-x-circle-fill"></i>
-                        </a>
+                        <div class="dropdown">
+                            <button class="dropdown-toggle-acciones" type="button" id="dropdownAccionesPago{{ pago.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-acciones dropdown-menu-end" aria-labelledby="dropdownAccionesPago{{ pago.id }}">
+                                <li><a class="dropdown-item" href="{% url 'socios:detalle_socio' pago.socio.id %}"><i class="bi bi-person-lines-fill text-info me-2"></i>Ver detalle socio</a></li>
+                                <li><a class="dropdown-item" href="{% url 'socios:editar_socio' pago.socio.id %}"><i class="bi bi-pencil-fill text-primary me-2"></i>Editar socio</a></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'pagos:eliminar_pago' pago.id %}" onclick="return confirm('¿Estás seguro de que querés eliminar este pago?');"><i class="bi bi-x-circle-fill me-2"></i>Eliminar pago</a></li>
+                            </ul>
+                        </div>
                     </td>
                 </tr>
             {% empty %}

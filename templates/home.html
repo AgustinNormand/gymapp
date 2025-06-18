@@ -215,7 +215,7 @@
                         <tr>
                             <th class="sortable cursor-pointer text-nowrap" data-col="0">Nombre <span class="sort-icon">⇅</span></th>
                             <th class="sortable cursor-pointer text-nowrap" data-col="1">Días sin asistir <span class="sort-icon">⇅</span></th>
-                            <th>Acciones</th>
+                            <th class="acciones-col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -228,34 +228,24 @@
                                 {% endif %}
                             </td>
                             <td>{{ socio.dias_sin_asistir }}</td>
-                            <td>
-                                {% if socio.telefono %}
-                                <a href="https://wa.me/54{{ socio.telefono }}" target="_blank" class="ms-1 text-decoration-none" title="Enviar WhatsApp">
-                                    <i class="bi bi-whatsapp text-success"></i>
-                                </a>
-                                {% endif %}
-                                <a href="{% url 'socios:detalle_socio' socio.id %}"
-                                class="text-info text-decoration-none" title="Ver detalle del socio">
-                                    <i class="bi bi-person-lines-fill"></i>
-                                </a>
-                                <a href="{% url 'socios:editar_socio' socio.id %}" class="ms-1 text-decoration-none" title="Editar socio">
-                                    <i class="bi bi-pencil-fill text-primary"></i>
-                                </a>
-                                <a href="{% url 'pagos:alta_pago' %}?socio_id={{ socio.id }}" class="ms-1 text-decoration-none" title="Registrar pago">
-                                    <i class="bi bi-cash text-primary"></i>
-                                </a>
-                                <a href="{% url 'modalidades:cambiar_modalidad' socio.id %}" class="ms-1 text-decoration-none" title="Cambiar modalidad">
-                                    <i class="bi bi-person-badge text-primary"></i>
-                                </a>
-                                <a href="{% url 'socios:gestionar_observaciones' socio.id %}" class="ms-1 text-decoration-none" title="Gestionar observaciones">
-                                    <i class="bi bi-eye text-primary"></i>
-                                </a>
-                                <a href="{% url 'ejercicios:gestionar_registros' socio.id %}" class="ms-1 text-decoration-none" title="Gestionar ejercicios">
-                                    <i class="bi bi-graph-up text-primary"></i>
-                                </a>
-                                <a href="{% url 'socios:eliminar_socio' socio.id %}" class="ms-1 text-decoration-none" title="Eliminar socio" onclick="return confirm('¿Seguro que querés borrar este registro?');">
-                                    <i class="bi bi-trash3-fill text-primary"></i>
-                                </a>
+                            <td class="text-center">
+                                <div class="dropdown">
+                                    <button class="dropdown-toggle-acciones" type="button" id="dropdownAccionesHome{{ socio.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-acciones dropdown-menu-end" aria-labelledby="dropdownAccionesHome{{ socio.id }}">
+                                        {% if socio.telefono %}
+                                        <li><a class="dropdown-item" href="https://wa.me/54{{ socio.telefono }}" target="_blank"><i class="bi bi-whatsapp text-success me-2"></i>WhatsApp</a></li>
+                                        {% endif %}
+                                        <li><a class="dropdown-item" href="{% url 'socios:detalle_socio' socio.id %}"><i class="bi bi-person-lines-fill text-info me-2"></i>Ver detalle</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'socios:editar_socio' socio.id %}"><i class="bi bi-pencil-fill text-primary me-2"></i>Editar socio</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'pagos:alta_pago' %}?socio_id={{ socio.id }}"><i class="bi bi-cash text-primary me-2"></i>Registrar pago</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'modalidades:cambiar_modalidad' socio.id %}"><i class="bi bi-person-badge text-primary me-2"></i>Cambiar modalidad</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'socios:gestionar_observaciones' socio.id %}"><i class="bi bi-eye text-primary me-2"></i>Gestionar observaciones</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'ejercicios:gestionar_registros' socio.id %}"><i class="bi bi-graph-up text-primary me-2"></i>Gestionar ejercicios</a></li>
+                                        <li><a class="dropdown-item text-danger" href="{% url 'socios:eliminar_socio' socio.id %}" onclick="return confirm('¿Seguro que querés borrar este registro?');"><i class="bi bi-trash3-fill me-2"></i>Eliminar socio</a></li>
+                                    </ul>
+                                </div>
                             </td>
                         </tr>
 

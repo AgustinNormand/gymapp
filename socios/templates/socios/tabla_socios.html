@@ -8,7 +8,7 @@
           <th class="text-center sortable" data-col="3">Teléfono <span class="sort-icon">⇅</span></th>
           <th class="text-center sortable" data-col="4">Datos Completos <span class="sort-icon">⇅</span></th>
           <th class="text-center sortable" data-col="5">Estado de Cuota <span class="sort-icon">⇅</span></th>
-          <th class="text-center">Acciones</th>
+          <th class="acciones-col">Acciones</th>
         </tr>
       </thead>
     <tbody>
@@ -32,29 +32,21 @@
                         {{ item.estado_cuota }}
                     </span>
                 </td>
-                <td>
-                    <a href="{% url 'socios:detalle_socio' item.socio.id %}"
-                    class="text-info text-decoration-none" title="Ver detalle del socio">
-                        <i class="bi bi-person-lines-fill"></i>
-                    </a>
-                    <a href="{% url 'socios:editar_socio' item.socio.id %}" class="ms-1 text-decoration-none" title="Editar socio">
-                        <i class="bi bi-pencil-fill text-primary"></i>
-                    </a>
-                    <a href="{% url 'pagos:alta_pago' %}?socio_id={{ item.socio.id }}" class="ms-1 text-decoration-none" title="Registrar pago">
-                        <i class="bi bi-cash text-primary"></i>
-                    </a>
-                    <a href="{% url 'modalidades:cambiar_modalidad' item.socio.id %}" class="ms-1 text-decoration-none" title="Cambiar modalidad">
-                        <i class="bi bi-person-badge text-primary"></i>
-                    </a>
-                    <a href="{% url 'socios:gestionar_observaciones' item.socio.id %}" class="ms-1 text-decoration-none" title="Gestionar observaciones">
-                        <i class="bi bi-eye text-primary"></i>
-                    </a>
-                    <a href="{% url 'ejercicios:gestionar_registros' item.socio.id %}" class="ms-1 text-decoration-none" title="Gestionar ejercicios">
-                        <i class="bi bi-graph-up text-primary"></i>
-                    </a>
-                    <a href="{% url 'socios:eliminar_socio' item.socio.id %}" class="ms-1 text-decoration-none" title="Eliminar socio" onclick="return confirm('¿Seguro que querés borrar este registro?');">
-                        <i class="bi bi-trash3-fill text-primary"></i>
-                    </a>
+                <td class="text-center">
+                    <div class="dropdown">
+                        <button class="dropdown-toggle-acciones" type="button" id="dropdownAccionesSocio{{ item.socio.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-acciones dropdown-menu-end" aria-labelledby="dropdownAccionesSocio{{ item.socio.id }}">
+                            <li><a class="dropdown-item" href="{% url 'socios:detalle_socio' item.socio.id %}"><i class="bi bi-person-lines-fill text-info me-2"></i>Ver detalle</a></li>
+                            <li><a class="dropdown-item" href="{% url 'socios:editar_socio' item.socio.id %}"><i class="bi bi-pencil-fill text-primary me-2"></i>Editar socio</a></li>
+                            <li><a class="dropdown-item" href="{% url 'pagos:alta_pago' %}?socio_id={{ item.socio.id }}"><i class="bi bi-cash text-primary me-2"></i>Registrar pago</a></li>
+                            <li><a class="dropdown-item" href="{% url 'modalidades:cambiar_modalidad' item.socio.id %}"><i class="bi bi-person-badge text-primary me-2"></i>Cambiar modalidad</a></li>
+                            <li><a class="dropdown-item" href="{% url 'socios:gestionar_observaciones' item.socio.id %}"><i class="bi bi-eye text-primary me-2"></i>Gestionar observaciones</a></li>
+                            <li><a class="dropdown-item" href="{% url 'ejercicios:gestionar_registros' item.socio.id %}"><i class="bi bi-graph-up text-primary me-2"></i>Gestionar ejercicios</a></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'socios:eliminar_socio' item.socio.id %}" onclick="return confirm('¿Seguro que querés borrar este registro?');"><i class="bi bi-trash3-fill me-2"></i>Eliminar socio</a></li>
+                        </ul>
+                    </div>
                 </td>
             </tr>
         {% empty %}
