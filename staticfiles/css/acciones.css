@@ -1,0 +1,44 @@
+/* Estilos unificados para la columna y el menú de acciones en todas las tablas */
+
+/* Columna de encabezado Acciones: ancho fijo y centrada */
+.acciones-col {
+    width: 100px;
+    text-align: center;
+}
+
+/* Botón de tres puntos */
+.dropdown-toggle-acciones {
+    background: none;
+    border: none;
+    color: #0d6efd; /* color primario Bootstrap */
+    padding: 0.25rem;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+/* Menú desplegable */
+.dropdown-menu-acciones {
+    min-width: 180px;
+    padding: 0.25rem;
+}
+.dropdown-menu-acciones .dropdown-item {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Alinear iconos y espacio */
+.dropdown-menu-acciones .dropdown-item i {
+    margin-right: 0.5rem;
+    font-size: 1rem;
+}
+
+/* Color para acciones destructivas dentro del dropdown */
+.dropdown-menu-acciones .dropdown-item.text-danger {
+    color: #dc3545;
+}
+.dropdown-menu-acciones .dropdown-item.text-danger:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}

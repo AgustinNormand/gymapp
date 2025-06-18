@@ -147,7 +147,13 @@
             height: auto;
         }
         /* Contenido de celdas */
+        .table-ejercicios,
+        .table-ejercicios thead,
+        .table-ejercicios tbody{
+            overflow: visible !important;
+        }
         .table-ejercicios td {
+            overflow: visible; /* Permite que los elementos absolutos (dropdown) sobresalgan */
             white-space: nowrap;
             font-size: 0.85rem;
             padding: 0.4rem 0.25rem;
@@ -167,6 +173,7 @@
         }
         /* Estilos para el menú de acciones */
         .dropdown-menu-acciones {
+            z-index: 12000; /* Por encima de globos / overlays */
             min-width: 180px;
             padding: 0.25rem;
         }
@@ -193,7 +200,7 @@
     </style>
     
     <div class="d-flex justify-content-center">
-        <div class="w-100" style="max-width: 1400px; overflow-x: auto;">
+        <div class="w-100" style="max-width: 1400px; overflow: visible;">
         <table class="table table-striped table-ejercicios">
     <thead>
         <tr>
@@ -283,7 +290,7 @@
 
             <td class="text-center">
                 <div class="dropdown">
-                    <button class="dropdown-toggle-acciones" type="button" id="dropdownAcciones{{ entrada.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="dropdown-toggle-acciones" type="button" id="dropdownAcciones{{ entrada.id }}" data-bs-toggle="dropdown" data-bs-container="body" data-bs-boundary="viewport" data-bs-flip="false" aria-expanded="false">
                         <i class="bi bi-three-dots-vertical"></i> 
                     </button>
                     <ul class="dropdown-menu dropdown-menu-acciones dropdown-menu-end" aria-labelledby="dropdownAcciones{{ entrada.id }}">
@@ -335,6 +342,20 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    // Inicializar dropdowns de acciones sin flip para que siempre abran hacia abajo
+    document.querySelectorAll('.dropdown-toggle-acciones').forEach(btn => {
+        new bootstrap.Dropdown(btn, {
+            popperConfig: {
+                placement: 'bottom-end',
+                modifiers: [
+                    {
+                        name: 'flip',
+                        enabled: false
+                    }
+                ]
+            }
+        });
+    });
     const input = document.getElementById("busquedaSocio");
     const resultados = document.getElementById("resultadosBusqueda");
     const inputHidden = document.getElementById("socioID");
