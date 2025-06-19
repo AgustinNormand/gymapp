@@ -96,10 +96,39 @@ def listar_pagos(request):
     # Este método se encarga de listar todos los pagos registrados en el sistema.
     # Se utiliza el método select_related para optimizar la consulta de pagos y socios.
     # Se utiliza el método order_by para ordenar los pagos por fecha de pago en orden descendente.
+    # Soporta filtrado por rango de fechas y por nombre/apellido del socio
 
+    # Obtener queryset inicial
     pagos = Pago.objects.select_related('socio').order_by('-fecha_pago')
     
-    return render(request, 'pagos/listar_pagos.html', {'pagos': pagos})
+    # Filtros
+    fecha_desde = request.GET.get('fecha_desde') or ''
+    fecha_hasta = request.GET.get('fecha_hasta') or ''
+    socio_query = request.GET.get('socio') or ''
+    
+    # Aplicar filtros si existen
+    if fecha_desde:
+        pagos = pagos.filter(fecha_pago__gte=fecha_desde)
+    
+    if fecha_hasta:
+        pagos = pagos.filter(fecha_pago__lte=fecha_hasta)
+    
+    if socio_query:
+        pagos = pagos.filter(
+            socio__nombre__icontains=socio_query
+        ) | pagos.filter(
+            socio__apellido__icontains=socio_query
+        )
+    
+    # Pasar los parámetros de filtro al contexto para mantenerlos en el formulario
+    context = {
+        'pagos': pagos,
+        'fecha_desde': fecha_desde,
+        'fecha_hasta': fecha_hasta,
+        'socio': socio_query,
+    }
+    
+    return render(request, 'pagos/listar_pagos.html', context)
 
 
 def eliminar_pago(request, pago_id):
