@@ -3,6 +3,21 @@
 {% block title %}Lista de Socios - CINAF{% endblock %}
 
 {% block content %}
+<style>
+    /* Estilos para evitar que se corte el dropdown */
+    .table, .table thead, .table tbody, .table td {
+        overflow: visible !important;
+    }
+    /* Z-index alto para el menú dropdown */
+    .dropdown-menu-acciones {
+        z-index: 12000;
+        min-width: 180px;
+    }
+    /* Contenedor con overflow visible */
+    .table-responsive {
+        overflow: visible !important;
+    }
+</style>
 <div class="container mt-5">
     <h2>Lista de Socios</h2>
     
