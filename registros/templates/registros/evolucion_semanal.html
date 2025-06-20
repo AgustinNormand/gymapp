@@ -4,6 +4,21 @@
 {% block title %}Evolución Semanal - CINAF{% endblock %}
 
 {% block content %}
+<style>
+    /* Estilos para evitar que se corte el dropdown */
+    .table, .table thead, .table tbody, .table td {
+        overflow: visible !important;
+    }
+    /* Z-index alto para el menú dropdown */
+    .dropdown-menu-acciones {
+        z-index: 12000;
+        min-width: 180px;
+    }
+    /* Contenedor con overflow visible */
+    .table-responsive {
+        overflow: visible !important;
+    }
+</style>
 <div class="container mt-4">
     <h2>Evolución Semanal</h2>
     
@@ -33,15 +48,14 @@
                     <th class="text-center sortable" data-col="4">Promedio semanal ({{ mes_actual }}) <span class="sort-icon">⇅</span></th>
                     <th class="text-center sortable" data-col="5">Diferencia <span class="sort-icon">⇅</span></th>
                     <th class="text-center sortable" data-col="6">Recomendación <span class="sort-icon">⇅</span></th>
+                    <th class="text-center">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 {% for estadistica in estadisticas %}
                 <tr>
                     <td class="text-center">
-                        <a href="{% url 'socios:detalle_socio' estadistica.socio.id %}">
-                            {{ estadistica.socio.apellido }}, {{ estadistica.socio.nombre }}
-                        </a>
+                        {{ estadistica.socio.apellido }}, {{ estadistica.socio.nombre }}
                     </td>
                     <td class="text-center">{% if estadistica.modalidad_mes_anterior %}
                             {{ estadistica.modalidad_mes_anterior.nombre }}
@@ -87,10 +101,25 @@
                             -
                         {% endif %}
                     </td>
+                    <td class="text-center">
+                        <div class="dropdown">
+                            <button class="dropdown-toggle-acciones" type="button" id="dropdownAcciones{{ estadistica.socio.id }}" data-bs-toggle="dropdown" data-bs-container="body" data-bs-boundary="viewport" aria-expanded="false">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-acciones dropdown-menu-end" aria-labelledby="dropdownAcciones{{ estadistica.socio.id }}">
+                                <li><a class="dropdown-item" href="{% url 'socios:detalle_socio' estadistica.socio.id %}"><i class="bi bi-person-lines-fill text-info me-2"></i>Ver detalle</a></li>
+                                <li><a class="dropdown-item" href="{% url 'socios:editar_socio' estadistica.socio.id %}"><i class="bi bi-pencil-fill text-primary me-2"></i>Editar socio</a></li>
+                                {% if estadistica.socio.telefono %}
+                                <li><a class="dropdown-item" href="https://wa.me/54{{ estadistica.socio.telefono }}" target="_blank"><i class="bi bi-whatsapp text-success me-2"></i>WhatsApp</a></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{% url 'modalidades:cambiar_modalidad' estadistica.socio.id %}"><i class="bi bi-person-badge text-primary me-2"></i>Cambiar modalidad</a></li>
+                            </ul>
+                        </div>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center">No hay datos disponibles</td>
+                    <td colspan="7" class="text-center">No hay datos disponibles</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -179,6 +208,8 @@
             
             // Función para ordenar la tabla por columna
             function ordenarTablaPorColumna(colIndex, asc = true) {
+                // No ordenar por la columna de acciones
+                if (colIndex === 7) return;
                 const filasOrdenadas = filas.sort((a, b) => {
                     // Extraer el texto de la celda correspondiente
                     let aText = a.children[colIndex].textContent.trim();

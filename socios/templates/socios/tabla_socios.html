@@ -40,6 +40,9 @@
                         <ul class="dropdown-menu dropdown-menu-acciones dropdown-menu-end" aria-labelledby="dropdownAccionesSocio{{ item.socio.id }}">
                             <li><a class="dropdown-item" href="{% url 'socios:detalle_socio' item.socio.id %}"><i class="bi bi-person-lines-fill text-info me-2"></i>Ver detalle</a></li>
                             <li><a class="dropdown-item" href="{% url 'socios:editar_socio' item.socio.id %}"><i class="bi bi-pencil-fill text-primary me-2"></i>Editar socio</a></li>
+                            {% if item.socio.telefono %}
+                            <li><a class="dropdown-item" href="https://wa.me/54{{ item.socio.telefono }}" target="_blank"><i class="bi bi-whatsapp text-success me-2"></i>WhatsApp</a></li>
+                            {% endif %}
                             <li><a class="dropdown-item" href="{% url 'pagos:alta_pago' %}?socio_id={{ item.socio.id }}"><i class="bi bi-cash text-primary me-2"></i>Registrar pago</a></li>
                             <li><a class="dropdown-item" href="{% url 'modalidades:cambiar_modalidad' item.socio.id %}"><i class="bi bi-person-badge text-primary me-2"></i>Cambiar modalidad</a></li>
                             <li><a class="dropdown-item" href="{% url 'socios:gestionar_observaciones' item.socio.id %}"><i class="bi bi-eye text-primary me-2"></i>Gestionar observaciones</a></li>

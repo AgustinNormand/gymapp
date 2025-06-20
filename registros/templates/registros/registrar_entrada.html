@@ -295,11 +295,16 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-acciones dropdown-menu-end" aria-labelledby="dropdownAcciones{{ entrada.id }}">
                         <li><a class="dropdown-item" href="{% url 'socios:detalle_socio' entrada.socio.id %}">
-                            <i class="bi bi-info-circle-fill text-info me-2"></i>Ver detalle
+                            <i class="bi bi-person-lines-fill text-info me-2"></i>Ver detalle
                         </a></li>
                         <li><a class="dropdown-item" href="{% url 'socios:editar_socio' entrada.socio.id %}">
                             <i class="bi bi-pencil-fill text-primary me-2"></i>Editar socio
                         </a></li>
+                        {% if entrada.socio.telefono %}
+                        <li><a class="dropdown-item" href="https://wa.me/54{{ entrada.socio.telefono }}" target="_blank">
+                            <i class="bi bi-whatsapp text-success me-2"></i>WhatsApp
+                        </a></li>
+                        {% endif %}
                         <li><a class="dropdown-item" href="{% url 'pagos:alta_pago' %}?socio_id={{ entrada.socio.id }}">
                             <i class="bi bi-cash text-primary me-2"></i>Registrar pago
                         </a></li>

@@ -76,8 +76,11 @@
                                 <i class="bi bi-three-dots-vertical"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-acciones dropdown-menu-end" aria-labelledby="dropdownAccionesPago{{ pago.id }}">
-                                <li><a class="dropdown-item" href="{% url 'socios:detalle_socio' pago.socio.id %}"><i class="bi bi-person-lines-fill text-info me-2"></i>Ver detalle socio</a></li>
+                                <li><a class="dropdown-item" href="{% url 'socios:detalle_socio' pago.socio.id %}"><i class="bi bi-person-lines-fill text-info me-2"></i>Ver detalle</a></li>
                                 <li><a class="dropdown-item" href="{% url 'socios:editar_socio' pago.socio.id %}"><i class="bi bi-pencil-fill text-primary me-2"></i>Editar socio</a></li>
+                                {% if pago.socio.telefono %}
+                                <li><a class="dropdown-item" href="https://wa.me/54{{ pago.socio.telefono }}" target="_blank"><i class="bi bi-whatsapp text-success me-2"></i>WhatsApp</a></li>
+                                {% endif %}
                                 <li><a class="dropdown-item text-danger" href="{% url 'pagos:eliminar_pago' pago.id %}" onclick="return confirm('¿Estás seguro de que querés eliminar este pago?');"><i class="bi bi-x-circle-fill me-2"></i>Eliminar pago</a></li>
                             </ul>
                         </div>
