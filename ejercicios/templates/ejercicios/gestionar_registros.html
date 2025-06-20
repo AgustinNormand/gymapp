@@ -70,4 +70,40 @@
     </table>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Object to store the latest weight for each exercise
+        const latestWeights = {};
+        
+        // Get all exercise records from the table
+        {% for registro in registros %}
+            // If this exercise doesn't exist in our object or is more recent, update it
+            if (!latestWeights[{{ registro.ejercicio.id }}] || 
+                new Date('{{ registro.fecha|date:"Y-m-d" }}') > new Date(latestWeights[{{ registro.ejercicio.id }}].date)) {
+                latestWeights[{{ registro.ejercicio.id }}] = {
+                    peso: '{{ registro.peso }}',
+                    date: '{{ registro.fecha|date:"Y-m-d" }}'
+                };
+            }
+        {% endfor %}
+        
+        // Listen for changes on the exercise dropdown
+        const ejercicioSelect = document.getElementById('ejercicio');
+        const pesoInput = document.getElementById('peso');
+        
+        ejercicioSelect.addEventListener('change', function() {
+            const ejercicioId = parseInt(this.value);
+            
+            // If the exercise has a recorded weight, fill the peso input
+            if (latestWeights[ejercicioId]) {
+                // Replace comma with dot for decimal separator before setting value
+                pesoInput.value = latestWeights[ejercicioId].peso.replace(',', '.');
+            } else {
+                // Clear the input if no weight is found
+                pesoInput.value = '';
+            }
+        });
+    });
+</script>
 {% endblock %}
