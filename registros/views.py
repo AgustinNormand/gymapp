@@ -256,6 +256,7 @@ def registrar_entrada(request):
         'entradas_hora': entradas_hoy,
         'ejercicios': ejercicios,
         'socios_cumpleanos': socios_cumpleanos,
+        'fecha_actual': now().date(),
     })
 
 def listar_entradas(request):

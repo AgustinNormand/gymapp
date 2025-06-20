@@ -33,6 +33,18 @@ class Socio(models.Model):
                 data[r.ejercicio_id] = r.peso
         self._cached_pesos = data
         return data
+        
+    @property
+    def pesos_con_fechas_por_ejercicio(self):
+        if hasattr(self, '_cached_pesos_con_fechas'):
+            return self._cached_pesos_con_fechas
+        registros = self.registros_ejercicio.order_by('ejercicio_id', '-fecha')
+        data = {}
+        for r in registros:
+            if r.ejercicio_id not in data:
+                data[r.ejercicio_id] = {'peso': r.peso, 'fecha': r.fecha}
+        self._cached_pesos_con_fechas = data
+        return data
 
 
     def get_observaciones_activas(self):

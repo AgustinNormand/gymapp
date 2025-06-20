@@ -278,9 +278,19 @@
 
             {% for ejercicio in ejercicios %}
                 <td class="text-center">
-                    {% with peso=entrada.socio.pesos_por_ejercicio|dict_get:ejercicio.id %}
-                        {% if peso %}
-                            {{ peso }} kg
+                    {% with peso_info=entrada.socio.pesos_con_fechas_por_ejercicio|dict_get:ejercicio.id %}
+                        {% if peso_info %}
+                            {% with peso=peso_info.peso fecha=peso_info.fecha %}
+                                {% with dias_transcurridos=fecha_actual.day|add:fecha_actual.month|add:'-'|add:fecha.day|add:'-'|add:fecha.month %}
+                                    {% if fecha_actual.year > fecha.year or fecha_actual.month > fecha.month|add:'1' %}
+                                        <span class="text-danger" data-bs-toggle="tooltip" title="Último cambio: {{ fecha|date:'d/m/Y' }}">{{ peso }} kg</span>
+                                    {% elif fecha_actual.month > fecha.month or fecha_actual.day > fecha.day|add:'21' %}
+                                        <span class="text-warning" data-bs-toggle="tooltip" title="Último cambio: {{ fecha|date:'d/m/Y' }}">{{ peso }} kg</span>
+                                    {% else %}
+                                        <span class="text-success" data-bs-toggle="tooltip" title="Último cambio: {{ fecha|date:'d/m/Y' }}">{{ peso }} kg</span>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endwith %}
                         {% else %}
                             <span class="text-muted">—</span>
                         {% endif %}
