@@ -104,6 +104,19 @@
                 pesoInput.value = '';
             }
         });
+        
+        // Check if there's an ejercicio_id in the URL and select that exercise
+        const urlParams = new URLSearchParams(window.location.search);
+        const ejercicioId = urlParams.get('ejercicio_id');
+        
+        if (ejercicioId) {
+            // Select the exercise in the dropdown
+            ejercicioSelect.value = ejercicioId;
+            
+            // Trigger the change event to update the peso input
+            const event = new Event('change');
+            ejercicioSelect.dispatchEvent(event);
+        }
     });
 </script>
 {% endblock %}
