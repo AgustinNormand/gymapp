@@ -5,6 +5,18 @@
 {% block content %}
 
 <style>
+    /* Fix para dropdowns en tablas */
+    .table, .table thead, .table tbody, .table td {
+        overflow: visible !important;
+    }
+    .dropdown-menu-acciones {
+        z-index: 12000;
+        min-width: 180px;
+    }
+    .table-responsive {
+        overflow: visible !important;
+    }
+    
     .btn-hover {
         transition: transform 0.2s, box-shadow 0.2s;
         cursor: pointer;
@@ -231,7 +243,7 @@
                             <td>{{ socio.dias_sin_asistir }}</td>
                             <td class="text-center">
                                 <div class="dropdown">
-                                    <button class="dropdown-toggle-acciones" type="button" id="dropdownAccionesHome{{ socio.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <button class="dropdown-toggle-acciones" type="button" id="dropdownAccionesHome{{ socio.id }}" data-bs-toggle="dropdown" data-bs-container="body" data-bs-boundary="viewport" aria-expanded="false">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-acciones dropdown-menu-end" aria-labelledby="dropdownAccionesHome{{ socio.id }}">

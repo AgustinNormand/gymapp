@@ -101,9 +101,13 @@ def listar_pagos(request):
     # Obtener queryset inicial
     pagos = Pago.objects.select_related('socio').order_by('-fecha_pago')
     
-    # Filtros
-    fecha_desde = request.GET.get('fecha_desde') or ''
-    fecha_hasta = request.GET.get('fecha_hasta') or ''
+    # Obtener la fecha de hoy
+    hoy = date.today()
+    hoy_iso = hoy.isoformat()
+    
+    # Filtros con valores por defecto
+    fecha_desde = request.GET.get('fecha_desde') or hoy_iso
+    fecha_hasta = request.GET.get('fecha_hasta') or hoy_iso
     socio_query = request.GET.get('socio') or ''
     
     # Aplicar filtros si existen

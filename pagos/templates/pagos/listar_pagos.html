@@ -3,6 +3,21 @@
 {% block title %}Pagos Realizados - CINAF{% endblock %}
 
 {% block content %}
+<style>
+    /* Estilos para evitar que se corte el dropdown */
+    .table, .table thead, .table tbody, .table td {
+        overflow: visible !important;
+    }
+    /* Z-index alto para el menú dropdown */
+    .dropdown-menu-acciones {
+        z-index: 12000;
+        min-width: 180px;
+    }
+    /* Contenedor con overflow visible */
+    .table-responsive {
+        overflow: visible !important;
+    }
+</style>
 <div class="container mt-5">
     <!-- Contenedor principal para alinear ambos elementos -->
     <h2>Pagos Realizados</h2>
@@ -57,7 +72,7 @@
                     <td class="text-center">{{ pago.fecha_vencimiento|date:"d/m/Y" }}</td>
                     <td class="text-center">
                         <div class="dropdown">
-                            <button class="dropdown-toggle-acciones" type="button" id="dropdownAccionesPago{{ pago.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="dropdown-toggle-acciones" type="button" id="dropdownAccionesPago{{ pago.id }}" data-bs-toggle="dropdown" data-bs-container="body" data-bs-boundary="viewport" aria-expanded="false">
                                 <i class="bi bi-three-dots-vertical"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-acciones dropdown-menu-end" aria-labelledby="dropdownAccionesPago{{ pago.id }}">
@@ -70,7 +85,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="5">No hay pagos registrados aún.</td>
+                    <td colspan="6">No hay pagos registrados aún.</td>
                 </tr>
             {% endfor %}
         </tbody>
