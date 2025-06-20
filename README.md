@@ -54,19 +54,17 @@ docker cp backup_gymdb.backup gymapp-db-1:/tmp/
 docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -v /tmp/backup_gymdb.backup
 
 ## Pending Tasks - Sorted by priority
-[] [Other] [Easy] Agregar a lista de acciones, un botón de agrgar al grupo de whatsapp
-[] [Other] [Easy] La vista de evolución semanal, habría que cambiar la columna de "Socio" para estandarizar con el resto
+[] [Other] [Easy] Levantar un warning, cuando una persona, hace un més, no modifica el peso de sus ejercicios
 [] [Other] [Easy] Algunas tablas no están 100% centradas
 [] [Other] [Easy] Centrar los filtros, en la vista de "Pagos Realizados", "Asistencias Registradas"
+[] [Other] [Easy] Cuando selecciono un ejercicio, en la vista de detalle de socio, quiero que scrolee para abajo
 [] [Other] [Easy] Revisar el gráfico de estadisticas de asistencais de la home, a veces da valores raros, pero capaz están bien
-[] [Other] [Easy] Reordenar como se muestran los pesos de los ejercicios
 [] [Other] [Easy] Acomodar la vista de "Detalle de Socio"
 [] [Other] [Easy] Revisar los formularios de "Gestionar Ejercicios", "Gestionar Pagos" ...
-[] [Other] [Easy] Cuando una persona puede ahorrar plata, agregar el link a WPP, o agregar un ícono cuando le paso asistencia (Que al presionarlo, me redirija, a la vista de "Evolución Semanal")
+[] [Other] [Easy] Cuando una persona puede ahorrar plata, agregar un ícono cuando le paso asistencia (Que al presionarlo, me redirija, a la vista de "Evolución Semanal")
 [] [Other] [Easy] Permitir que se pueda cargar una asistencia de un momento pasado
-[] [Functional] [Easy] Levantar un warning, cuando una persona, hace un més, no modifica el peso de sus ejercicios
 [] [Other] [Hard] Eliminar los casos donde se cambió la modalidad de un socio, a la misma modalidad
-[] [Functional] [Medium] Ver de crear distintos usuarios, con roles diferentes, para los distintos profes
+[] [Functional] [Medium] Crear distintos usuarios, con roles diferentes, para los distintos profes
 [] [Infra] [Medium] Add volume to Postgres to save information
 [] [Infra] [Medium] Add Nginx to production scope
 [] [Other] [Medium] Script que periodicamente pullea el repo en la rama main, y si hay cambios, hace un "docker-compose up"
@@ -74,6 +72,6 @@ docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -
 [] [Other] [Hard] Deploy de la solución en GCP, en la capa Free Tier
 
 ### Next steps - Going to the moon
-[] Agregar cantidad de ingresos estimados
-[] Mandarle un whatsapp a un socio, cuando dejó de venir
+[] Agregar cantidad de ingresos estimados para meses siguientes
+[] Mandarle un whatsapp a un socio de forma automática, cuando dejó de venir
 [] Cargar foto de cada socio, para usar en reconocimiento facial

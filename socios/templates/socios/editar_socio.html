@@ -14,7 +14,16 @@
                 <small class="text-muted">(opcional)</small>
             {% endif %}
             </label>
-            {{ field }}
+            {% if field.name == 'telefono' %}
+            <div class="input-group">
+                {{ field }}
+                <button type="button" class="btn btn-success" onclick="invitarWhatsapp()">
+                    <i class="bi bi-whatsapp"></i> Invitar al Grupo de CINAF
+                </button>
+            </div>
+            {% else %}
+                {{ field }}
+            {% endif %}
             {% if field.errors %}
             <div class="text-danger">{{ field.errors }}</div>
             {% endif %}
@@ -22,4 +31,19 @@
         {% endfor %}
         <button type="submit" class="btn btn-primary">Guardar Cambios</button>
     </form>
+
+    <script>
+        function invitarWhatsapp() {
+            const telefono = document.getElementById('id_telefono').value;
+            if (telefono) {
+                // Eliminar cualquier caracter que no sea número
+                const telefonoLimpio = telefono.replace(/\D/g, '');
+                // Crear enlace de WhatsApp
+                const url = `https://wa.me/${telefonoLimpio}?text=Hola! Te invitamos al grupo de WhatsApp de CINAF! Ingresá a: https://chat.whatsapp.com/B9t6fWhhrqi5MzSpINSj0A`;
+                window.open(url, '_blank');
+            } else {
+                alert('Por favor, ingresa un número de teléfono primero.');
+            }
+        }
+    </script>
 {% endblock %}
