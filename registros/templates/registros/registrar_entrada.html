@@ -129,6 +129,9 @@
 <div class="mt-4">
     <style>
         /* Estilos para tabla ajustada al ancho completo */
+        .text-orange {
+            color: #fd7e14 !important;
+        }
         .table-ejercicios {
             width: 100%;
             max-width: 1400px;
@@ -285,7 +288,7 @@
                                     {% if fecha_actual.year > fecha.year or fecha_actual.month > fecha.month|add:'1' %}
                                         <a href="{% url 'ejercicios:gestionar_registros' entrada.socio.id %}?ejercicio_id={{ ejercicio.id }}" class="text-danger" data-bs-toggle="tooltip" title="Último cambio: {{ fecha|date:'d/m/Y' }}. Clic para gestionar.">{{ peso }} kg</a>
                                     {% elif fecha_actual.month > fecha.month or fecha_actual.day > fecha.day|add:'21' %}
-                                        <a href="{% url 'ejercicios:gestionar_registros' entrada.socio.id %}?ejercicio_id={{ ejercicio.id }}" class="text-warning" data-bs-toggle="tooltip" title="Último cambio: {{ fecha|date:'d/m/Y' }}. Clic para gestionar.">{{ peso }} kg</a>
+                                        <a href="{% url 'ejercicios:gestionar_registros' entrada.socio.id %}?ejercicio_id={{ ejercicio.id }}" class="text-orange" data-bs-toggle="tooltip" title="Último cambio: {{ fecha|date:'d/m/Y' }}. Clic para gestionar.">{{ peso }} kg</a>
                                     {% else %}
                                         <a href="{% url 'ejercicios:gestionar_registros' entrada.socio.id %}?ejercicio_id={{ ejercicio.id }}" class="text-success" data-bs-toggle="tooltip" title="Último cambio: {{ fecha|date:'d/m/Y' }}. Clic para gestionar.">{{ peso }} kg</a>
                                     {% endif %}
