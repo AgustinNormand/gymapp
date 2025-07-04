@@ -58,4 +58,13 @@ def cambiar_modalidad(request, socio_id):
             messages.success(request, f"Modalidad cambiada a {nueva_modalidad.nombre} para el socio {socio.nombre} {socio.apellido}.")
             return redirect('socios:listar_socios')
 
-    return render(request, 'modalidades/cambiar_modalidad.html', {'socio': socio, 'modalidades': modalidades})
+    # Obtener la modalidad actual del socio para mostrarla en la plantilla
+    historial_modalidad_actual = socio.modalidad_actual()
+    modalidad_actual = historial_modalidad_actual.modalidad if historial_modalidad_actual else None
+    
+    return render(request, 'modalidades/cambiar_modalidad.html', {
+        'socio': socio, 
+        'modalidades': modalidades,
+        'modalidad_actual': modalidad_actual,
+        'historial_modalidad': historial_modalidad_actual
+    })

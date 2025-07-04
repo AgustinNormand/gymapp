@@ -6,6 +6,17 @@
 <div class="container mt-5">
     <h2>Cambiar Modalidad de {{ socio.nombre }} {{ socio.apellido }}</h2>
 
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Información Actual</h5>
+            {% if modalidad_actual %}
+                <p class="card-text"><strong>Modalidad Actual:</strong> {{ modalidad_actual.nombre }}</p>
+            {% else %}
+                <p class="card-text">El socio no tiene ninguna modalidad asignada actualmente.</p>
+            {% endif %}
+        </div>
+    </div>
+
     <form method="post">
         {% csrf_token %}
         <div class="mb-3">
