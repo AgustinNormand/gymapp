@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'registros',
     'pagos',
     'modalidades',
-    'ejercicios'
+    'ejercicios',
+    'facturacion'
 ]
 
 MIDDLEWARE = [
