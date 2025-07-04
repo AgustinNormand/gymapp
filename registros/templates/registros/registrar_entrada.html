@@ -295,7 +295,7 @@
                                 {% endwith %}
                             {% endwith %}
                         {% else %}
-                            <span class="text-muted">—</span>
+                            <a href="{% url 'ejercicios:gestionar_registros' entrada.socio.id %}?ejercicio_id={{ ejercicio.id }}" class="text-muted" data-bs-toggle="tooltip" title="Sin peso asignado. Clic para gestionar.">?</a>
                         {% endif %}
                     {% endwith %}
                 </td>
