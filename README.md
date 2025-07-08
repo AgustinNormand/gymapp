@@ -54,11 +54,10 @@ docker cp backup_gymdb.backup gymapp-db-1:/tmp/
 docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -v /tmp/backup_gymdb.backup
 
 ## Pending Tasks - Sorted by priority
-[] [Other] [Easy] Levantar un warning, cuando una persona, hace un més, no modifica el peso de sus ejercicios
 [] [Other] [Easy] Algunas tablas no están 100% centradas
 [] [Other] [Easy] Centrar los filtros, en la vista de "Pagos Realizados", "Asistencias Registradas"
 [] [Other] [Easy] Cuando selecciono un ejercicio, en la vista de detalle de socio, quiero que scrolee para abajo
-[] [Other] [Easy] Revisar el gráfico de estadisticas de asistencais de la home, a veces da valores raros, pero capaz están bien
+[] [Other] [Easy] Revisar el gráfico de estadisticas de asistencias de la home, a veces da valores raros, pero capaz están bien
 [] [Other] [Easy] Acomodar la vista de "Detalle de Socio"
 [] [Other] [Easy] Revisar los formularios de "Gestionar Ejercicios", "Gestionar Pagos" ...
 [] [Other] [Easy] Cuando una persona puede ahorrar plata, agregar un ícono cuando le paso asistencia (Que al presionarlo, me redirija, a la vista de "Evolución Semanal")

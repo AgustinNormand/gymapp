@@ -3,6 +3,12 @@ staticfiles/admin/img/*
 staticfiles/admin/css/*
 
 backend/__pycache__/*
+ejercicios/__pycache__/*
+modalidades/__pycache__/*
+pagos/__pycache__/*
+registros/__pycache__/*
+socios/__pycache__/*
+socios/migrations/__pycache__/*
 .env
 zcripts/*
 *.csv
