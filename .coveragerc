@@ -1,0 +1,27 @@
+[run]
+source = backend,ejercicios,modalidades,pagos,registros,socios
+omit = 
+    */migrations/*
+    */tests.py
+    */tests/*
+    */__pycache__/*
+    */apps.py
+    */admin.py
+    */asgi.py
+    */wsgi.py
+    */create_superuser.py
+    */urls.py
+    */settings.py
+    */manage.py
+    */__init__.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    def __str__
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    pass
+    raise ImportError
+    except ImportError
