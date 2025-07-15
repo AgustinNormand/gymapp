@@ -205,12 +205,14 @@ def eliminar_entrada(request, id):
 def registrar_entrada(request):
     # Este método se encarga de registrar la entrada de un socio al gimnasio.
 
-    ahora = now()
+    from django.utils import timezone
+    # Obtener fecha y hora locales para evitar desfases por zona horaria (UTC vs local)
+    ahora = timezone.localtime()
     inicio_hora = ahora.replace(minute=0, second=0, microsecond=0)
     fin_hora = ahora.replace(minute=59, second=59, microsecond=999999)
     
-    # Calcular inicio y fin de la semana actual (lunes a domingo)
-    hoy = ahora.date()
+    # Fecha actual en la zona horaria local
+    hoy = timezone.localdate()
     inicio_semana = hoy - timedelta(days=hoy.weekday())
     fin_semana = inicio_semana + timedelta(days=6)
 
@@ -236,13 +238,15 @@ def registrar_entrada(request):
         Prefetch('socio', queryset=Socio.objects.prefetch_related(observaciones_activas, observaciones_pasadas))
     )
 
-    # Verificar si algún socio de las entradas registradas cumple años esta semana
+    # Verificar si algún socio de las entradas registradas cumple años HOY
     socios_cumpleanos = []
     for entrada in entradas_hoy:
         socio = entrada.socio
         if socio.fecha_nacimiento:
+            # Normalizar la fecha de cumpleaños al año actual para comparar sólo día y mes
             fecha_cumple_este_anio = socio.fecha_nacimiento.replace(year=hoy.year)
-            if inicio_semana <= fecha_cumple_este_anio <= fin_semana:
+            # Mostrar la celebración únicamente si ES HOY
+            if fecha_cumple_este_anio == hoy:
                 socios_cumpleanos.append({
                     'id': socio.id,
                     'nombre': socio.nombre,
