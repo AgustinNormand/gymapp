@@ -196,8 +196,15 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Inicializar tooltips con configuración personalizada
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl, {
+                    placement: 'top',  // Mostrar arriba del elemento
+                    trigger: 'hover',  // Mostrar al pasar el mouse
+                    container: 'body', // Asegurar que el tooltip no se quede atrapado en contenedores con overflow
+                    boundary: 'window' // Mantener el tooltip dentro de la ventana
+                });
                 new bootstrap.Tooltip(tooltipTriggerEl);
             });
         });
