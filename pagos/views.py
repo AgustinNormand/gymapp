@@ -67,7 +67,8 @@ def alta_pago(request):
                 )
 
             messages.success(request, f"Pago registrado correctamente para {socio.nombre} {socio.apellido}.")
-            return redirect('pagos:listar_pagos')
+            next_url = request.GET.get('next', 'pagos:listar_pagos')
+            return redirect(next_url)
     else:
         # Formateamos la fecha en formato ISO (yyyy-MM-dd) para el input type="date"
         ultimo_dia_mes_iso = ultimo_dia_mes.isoformat()

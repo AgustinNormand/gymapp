@@ -28,9 +28,11 @@
                     {% endif %}
                 </td>
                 <td>
-                    <span class="badge bg-{{ item.color_cuota }}">
-                        {{ item.estado_cuota }}
-                    </span>
+                    <a href="{% url 'pagos:alta_pago' %}?socio_id={{ item.socio.id }}&next={% url 'socios:listar_socios' %}" class="text-decoration-none">
+                        <span class="badge bg-{{ item.color_cuota }}">
+                            {{ item.estado_cuota }}
+                        </span>
+                    </a>
                 </td>
                 <td class="text-center">
                     <div class="dropdown">
@@ -43,7 +45,7 @@
                             {% if item.socio.telefono %}
                             <li><a class="dropdown-item" href="https://wa.me/54{{ item.socio.telefono }}" target="_blank"><i class="bi bi-whatsapp text-success me-2"></i>WhatsApp</a></li>
                             {% endif %}
-                            <li><a class="dropdown-item" href="{% url 'pagos:alta_pago' %}?socio_id={{ item.socio.id }}"><i class="bi bi-cash text-primary me-2"></i>Registrar pago</a></li>
+                            <li><a class="dropdown-item" href="{% url 'pagos:alta_pago' %}?socio_id={{ item.socio.id }}&next={% url 'socios:listar_socios' %}"><i class="bi bi-cash text-primary me-2"></i>Registrar pago</a></li>
                             <li><a class="dropdown-item" href="{% url 'modalidades:cambiar_modalidad' item.socio.id %}"><i class="bi bi-person-badge text-primary me-2"></i>Cambiar modalidad</a></li>
                             <li><a class="dropdown-item" href="{% url 'socios:gestionar_observaciones' item.socio.id %}"><i class="bi bi-eye text-primary me-2"></i>Gestionar observaciones</a></li>
                             <li><a class="dropdown-item" href="{% url 'ejercicios:gestionar_registros' item.socio.id %}"><i class="bi bi-graph-up text-primary me-2"></i>Gestionar ejercicios</a></li>
