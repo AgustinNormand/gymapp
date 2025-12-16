@@ -26,8 +26,16 @@ def home(request):
     
     for socio in socios_con_fecha:
         if socio.fecha_nacimiento:
-            # Verificar si el cumpleaños es hoy (ignorando el año)
-            fecha_cumple_este_anio = socio.fecha_nacimiento.replace(year=hoy.year)
+            # Verificar si el cumpleaños es hoy (manejar 29 de febrero en años no bisiestos)
+            try:
+                fecha_cumple_este_anio = socio.fecha_nacimiento.replace(year=hoy.year)
+            except ValueError:
+                # Si es 29 de febrero y el año actual no es bisiesto, usar 28 de febrero
+                if socio.fecha_nacimiento.month == 2 and socio.fecha_nacimiento.day == 29:
+                    fecha_cumple_este_anio = date(hoy.year, 2, 28)
+                else:
+                    raise
+            
             print(f"Socio: {socio.nombre} {socio.apellido}, Cumpleaños este año: {fecha_cumple_este_anio}")
             
             if fecha_cumple_este_anio == hoy:
