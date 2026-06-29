@@ -56,7 +56,7 @@ services:
     entrypoint: /bin/sh
     command:
       - -c
-      - "while true; do rclone sync /data ${RCLONE_REMOTE} --config /config/rclone/rclone.conf --log-level INFO; sleep 86400; done"
+      - "while true; do rclone sync /data ${RCLONE_REMOTE} --config /config/rclone/rclone.conf --copy-links --log-level INFO; sleep 86400; done"
     volumes:
       - ./backups:/data:ro
       - ./rclone.conf:/config/rclone/rclone.conf:ro
