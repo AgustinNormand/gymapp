@@ -12,3 +12,7 @@ socios/migrations/__pycache__/*
 .env
 zcripts/*
 *.csv
+
+# Backups locales (no versionar) y secreto de rclone (token de Google Drive)
+backups/
+rclone.conf

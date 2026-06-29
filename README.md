@@ -43,15 +43,40 @@ docker-compose up --build
 ### Build a new app
 docker-compose run web python manage.py startapp pagos
 
-## Backupear la base
-docker exec -t gymapp-db-1 pg_dump -U gymuser -F c -b -v -f /tmp/backup_gymdb.backup gymdb
+## Backups
 
-docker cp gymapp-db-1:/tmp/backup_gymdb.backup /home/nicolas/Backups/gymapp_backups/
+Los backups son **automáticos** vía dos servicios sidecar en `docker-compose`
+(idénticos en Linux y Windows):
+
+- `db-backup` (`prodrigestivill/postgres-backup-local:15`): corre `pg_dump` **diario**
+  con rotación **7 diarios + 4 semanales**. Deja los dumps (`.sql.gz`) en la carpeta
+  `./backups/{last,daily,weekly,monthly}/` del host.
+- `db-backup-offsite` (`rclone/rclone`): replica `./backups` a Google Drive 1×/día.
+
+### Setup one-time de Google Drive (rclone)
+Se hace **una vez** en una máquina con navegador y se copia el `rclone.conf` a cada gym:
+
+1. Instalar rclone y crear el remote:
+   `rclone config` → `n` (new) → nombre `gdrive` → backend `drive` → autorizar en el
+   navegador. Genera `~/.config/rclone/rclone.conf`.
+2. Copiar ese `rclone.conf` a la **raíz del proyecto** en cada gym
+   (`C:\gymapp\rclone.conf` en Windows, `.../gymapp/rclone.conf` en Linux). No se versiona.
+3. En el `.env` de cada gym, setear `RCLONE_REMOTE` con un subfolder distinto por gym
+   (ej. `gdrive:gym-backups/cinaf` y `gdrive:gym-backups/gym2`).
+4. Levantar los servicios: `docker compose up -d db-backup db-backup-offsite`
+
+### Forzar un backup manual ahora
+docker compose exec db-backup /backup.sh
 
 ### Restaurar la base, desde un backup
-docker cp backup_gymdb.backup gymapp-db-1:/tmp/
+Los dumps son SQL plano gzippeado. Recrear la base y cargar el dump elegido:
 
-docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -v /tmp/backup_gymdb.backup
+docker exec -i gymapp-db-1 psql -U gymuser -d postgres -c "DROP DATABASE IF EXISTS gymdb;" -c "CREATE DATABASE gymdb OWNER gymuser;"
+
+gunzip -c backups/daily/gymdb-YYYYMMDD.sql.gz | docker exec -i gymapp-db-1 psql -U gymuser -d gymdb
+
+Para restaurar desde el offsite, bajar primero el archivo:
+docker compose exec db-backup-offsite rclone copy ${RCLONE_REMOTE}/daily/gymdb-YYYYMMDD.sql.gz /data/restore/
 
 ## Pending Tasks - Sorted by priority
 [] [Other] [Easy] Algunas tablas no están 100% centradas
@@ -67,7 +92,7 @@ docker exec -it gymapp-db-1 pg_restore -U gymuser -d gymdb --clean --if-exists -
 [] [Infra] [Medium] Add volume to Postgres to save information
 [] [Infra] [Medium] Add Nginx to production scope
 [] [Other] [Medium] Script que periodicamente pullea el repo en la rama main, y si hay cambios, hace un "docker-compose up"
-[] [Other] [Medium] Script que hace un backup de la base de datos
+[x] [Other] [Medium] Script que hace un backup de la base de datos (backups automáticos diarios local + offsite, ver sección "Backups")
 [] [Other] [Hard] Deploy de la solución en GCP, en la capa Free Tier
 
 ### Next steps - Going to the moon

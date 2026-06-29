@@ -31,5 +31,36 @@ services:
       PGTZ: America/Argentina/Buenos_Aires
     restart: unless-stopped
 
+  db-backup:
+    image: prodrigestivill/postgres-backup-local:15
+    depends_on:
+      - db
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      SCHEDULE: "@daily"
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      BACKUP_KEEP_MONTHS: 0          # 7 diarios + 4 semanales (sin mensuales)
+      TZ: America/Argentina/Buenos_Aires
+    volumes:
+      - ./backups:/backups
+    restart: unless-stopped
+
+  db-backup-offsite:
+    image: rclone/rclone:latest
+    depends_on:
+      - db-backup
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - "while true; do rclone sync /data ${RCLONE_REMOTE} --config /config/rclone/rclone.conf --log-level INFO; sleep 86400; done"
+    volumes:
+      - ./backups:/data:ro
+      - ./rclone.conf:/config/rclone/rclone.conf:ro
+    restart: unless-stopped
+
 volumes:
   pgdata:
