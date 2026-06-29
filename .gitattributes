@@ -1,0 +1,5 @@
+# Forzar fin de línea LF en los scripts de shell.
+# En Windows, git convertiría estos archivos a CRLF al hacer checkout, lo que
+# rompe el shebang (#!/bin/bash) dentro del contenedor Linux y provoca el error
+# "exec ./entrypoint.sh: no such file or directory".
+*.sh text eol=lf

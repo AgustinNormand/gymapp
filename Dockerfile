@@ -15,8 +15,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el proyecto
 COPY . .
 
-# Asegurar permisos de los scripts
-RUN chmod +x /app/entrypoint.sh /app/wait_for_db.sh
+# Normalizar fin de línea (por si se clonó en Windows con CRLF) y asegurar permisos
+RUN sed -i 's/\r$//' /app/entrypoint.sh /app/wait_for_db.sh \
+    && chmod +x /app/entrypoint.sh /app/wait_for_db.sh
 
 # EntryPoint
 CMD ["./entrypoint.sh"]
